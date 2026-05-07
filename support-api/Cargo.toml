@@ -1,0 +1,46 @@
+[package]
+name = "support-api"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "support_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "support-api"
+path = "src/main.rs"
+
+[features]
+local-dev = ["v-api/local-dev"]
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+config = { workspace = true }
+ctrlc = { workspace = true }
+derive_builder = { workspace = true }
+dropshot = { workspace = true }
+http = { workspace = true }
+newtype-uuid = { workspace = true }
+rustls = { workspace = true }
+schemars = { workspace = true }
+secrecy = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+slog = { workspace = true }
+slog-async = { workspace = true }
+support-model = { path = "../support-model" }
+tap = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+tracing-appender = { workspace = true }
+tracing-slog = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
+v-api = { workspace = true }
+v-api-param = { workspace = true }
+v-api-permission-derive = { workspace = true }
+v-model = { workspace = true }
