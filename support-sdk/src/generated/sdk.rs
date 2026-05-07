@@ -2414,6 +2414,7 @@ pub mod types {
     ///  "required": [
     ///    "code",
     ///    "grant_type",
+    ///    "pkce_verifier",
     ///    "redirect_uri"
     ///  ],
     ///  "properties": {
@@ -2456,10 +2457,9 @@ pub mod types {
     ///      "type": "string"
     ///    },
     ///    "pkce_verifier": {
-    ///      "type": [
-    ///        "string",
-    ///        "null"
-    ///      ]
+    ///      "description": "PKCE code verifier (RFC 7636). Required for all
+    /// authorization code exchanges.",
+    ///      "type": "string"
     ///    },
     ///    "redirect_uri": {
     ///      "type": "string"
@@ -2481,8 +2481,9 @@ pub mod types {
         pub client_secret: ::std::option::Option<SecretString>,
         pub code: ::std::string::String,
         pub grant_type: ::std::string::String,
-        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub pkce_verifier: ::std::option::Option<::std::string::String>,
+        /// PKCE code verifier (RFC 7636). Required for all authorization code
+        /// exchanges.
+        pub pkce_verifier: ::std::string::String,
         pub redirect_uri: ::std::string::String,
     }
 
@@ -2870,7 +2871,6 @@ pub mod types {
     ///  "required": [
     ///    "auth_url_endpoint",
     ///    "client_id",
-    ///    "client_secret",
     ///    "token_endpoint",
     ///    "token_endpoint_content_type"
     ///  ],
@@ -2880,9 +2880,6 @@ pub mod types {
     ///    },
     ///    "client_id": {
     ///      "type": "string"
-    ///    },
-    ///    "client_secret": {
-    ///      "$ref": "#/components/schemas/SecretString"
     ///    },
     ///    "revocation_endpoint": {
     ///      "type": [
@@ -2909,7 +2906,6 @@ pub mod types {
     pub struct OAuthProviderAuthorizationCodeRemoteInfo {
         pub auth_url_endpoint: ::std::string::String,
         pub client_id: ::std::string::String,
-        pub client_secret: SecretString,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub revocation_endpoint: ::std::option::Option<::std::string::String>,
         pub token_endpoint: ::std::string::String,
@@ -2933,7 +2929,6 @@ pub mod types {
     ///    "client_id",
     ///    "device_code_endpoint",
     ///    "remote_client_id",
-    ///    "remote_client_secret",
     ///    "token_endpoint",
     ///    "token_endpoint_content_type"
     ///  ],
@@ -2946,9 +2941,6 @@ pub mod types {
     ///    },
     ///    "remote_client_id": {
     ///      "type": "string"
-    ///    },
-    ///    "remote_client_secret": {
-    ///      "$ref": "#/components/schemas/SecretString"
     ///    },
     ///    "revocation_endpoint": {
     ///      "type": [
@@ -2976,7 +2968,6 @@ pub mod types {
         pub client_id: TypedUuidForOAuthClientId,
         pub device_code_endpoint: ::std::string::String,
         pub remote_client_id: ::std::string::String,
-        pub remote_client_secret: SecretString,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub revocation_endpoint: ::std::option::Option<::std::string::String>,
         pub token_endpoint: ::std::string::String,
@@ -6890,10 +6881,7 @@ pub mod types {
             >,
             code: ::std::result::Result<::std::string::String, ::std::string::String>,
             grant_type: ::std::result::Result<::std::string::String, ::std::string::String>,
-            pkce_verifier: ::std::result::Result<
-                ::std::option::Option<::std::string::String>,
-                ::std::string::String,
-            >,
+            pkce_verifier: ::std::result::Result<::std::string::String, ::std::string::String>,
             redirect_uri: ::std::result::Result<::std::string::String, ::std::string::String>,
         }
 
@@ -6904,7 +6892,7 @@ pub mod types {
                     client_secret: Ok(Default::default()),
                     code: Err("no value supplied for code".to_string()),
                     grant_type: Err("no value supplied for grant_type".to_string()),
-                    pkce_verifier: Ok(Default::default()),
+                    pkce_verifier: Err("no value supplied for pkce_verifier".to_string()),
                     redirect_uri: Err("no value supplied for redirect_uri".to_string()),
                 }
             }
@@ -6953,7 +6941,7 @@ pub mod types {
             }
             pub fn pkce_verifier<T>(mut self, value: T) -> Self
             where
-                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+                T: ::std::convert::TryInto<::std::string::String>,
                 T::Error: ::std::fmt::Display,
             {
                 self.pkce_verifier = value
@@ -7641,7 +7629,6 @@ pub mod types {
         pub struct OAuthProviderAuthorizationCodeRemoteInfo {
             auth_url_endpoint: ::std::result::Result<::std::string::String, ::std::string::String>,
             client_id: ::std::result::Result<::std::string::String, ::std::string::String>,
-            client_secret: ::std::result::Result<super::SecretString, ::std::string::String>,
             revocation_endpoint: ::std::result::Result<
                 ::std::option::Option<::std::string::String>,
                 ::std::string::String,
@@ -7656,7 +7643,6 @@ pub mod types {
                 Self {
                     auth_url_endpoint: Err("no value supplied for auth_url_endpoint".to_string()),
                     client_id: Err("no value supplied for client_id".to_string()),
-                    client_secret: Err("no value supplied for client_secret".to_string()),
                     revocation_endpoint: Ok(Default::default()),
                     token_endpoint: Err("no value supplied for token_endpoint".to_string()),
                     token_endpoint_content_type: Err("no value supplied for \
@@ -7685,16 +7671,6 @@ pub mod types {
                 self.client_id = value
                     .try_into()
                     .map_err(|e| format!("error converting supplied value for client_id: {e}"));
-                self
-            }
-            pub fn client_secret<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<super::SecretString>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.client_secret = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for client_secret: {e}"));
                 self
             }
             pub fn revocation_endpoint<T>(mut self, value: T) -> Self
@@ -7739,7 +7715,6 @@ pub mod types {
                 Ok(Self {
                     auth_url_endpoint: value.auth_url_endpoint?,
                     client_id: value.client_id?,
-                    client_secret: value.client_secret?,
                     revocation_endpoint: value.revocation_endpoint?,
                     token_endpoint: value.token_endpoint?,
                     token_endpoint_content_type: value.token_endpoint_content_type?,
@@ -7754,7 +7729,6 @@ pub mod types {
                 Self {
                     auth_url_endpoint: Ok(value.auth_url_endpoint),
                     client_id: Ok(value.client_id),
-                    client_secret: Ok(value.client_secret),
                     revocation_endpoint: Ok(value.revocation_endpoint),
                     token_endpoint: Ok(value.token_endpoint),
                     token_endpoint_content_type: Ok(value.token_endpoint_content_type),
@@ -7769,7 +7743,6 @@ pub mod types {
             device_code_endpoint:
                 ::std::result::Result<::std::string::String, ::std::string::String>,
             remote_client_id: ::std::result::Result<::std::string::String, ::std::string::String>,
-            remote_client_secret: ::std::result::Result<super::SecretString, ::std::string::String>,
             revocation_endpoint: ::std::result::Result<
                 ::std::option::Option<::std::string::String>,
                 ::std::string::String,
@@ -7787,9 +7760,6 @@ pub mod types {
                         "no value supplied for device_code_endpoint".to_string()
                     ),
                     remote_client_id: Err("no value supplied for remote_client_id".to_string()),
-                    remote_client_secret: Err(
-                        "no value supplied for remote_client_secret".to_string()
-                    ),
                     revocation_endpoint: Ok(Default::default()),
                     token_endpoint: Err("no value supplied for token_endpoint".to_string()),
                     token_endpoint_content_type: Err("no value supplied for \
@@ -7827,16 +7797,6 @@ pub mod types {
             {
                 self.remote_client_id = value.try_into().map_err(|e| {
                     format!("error converting supplied value for remote_client_id: {e}")
-                });
-                self
-            }
-            pub fn remote_client_secret<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<super::SecretString>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.remote_client_secret = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for remote_client_secret: {e}")
                 });
                 self
             }
@@ -7881,7 +7841,6 @@ pub mod types {
                     client_id: value.client_id?,
                     device_code_endpoint: value.device_code_endpoint?,
                     remote_client_id: value.remote_client_id?,
-                    remote_client_secret: value.remote_client_secret?,
                     revocation_endpoint: value.revocation_endpoint?,
                     token_endpoint: value.token_endpoint?,
                     token_endpoint_content_type: value.token_endpoint_content_type?,
@@ -7895,7 +7854,6 @@ pub mod types {
                     client_id: Ok(value.client_id),
                     device_code_endpoint: Ok(value.device_code_endpoint),
                     remote_client_id: Ok(value.remote_client_id),
-                    remote_client_secret: Ok(value.remote_client_secret),
                     revocation_endpoint: Ok(value.revocation_endpoint),
                     token_endpoint: Ok(value.token_endpoint),
                     token_endpoint_content_type: Ok(value.token_endpoint_content_type),
@@ -8332,10 +8290,22 @@ impl Client {
     ///
     /// Sends a `GET` request to `/login/oauth/{provider}/code/authorize`
     ///
+    /// Arguments:
+    /// - `provider`
+    /// - `client_id`
+    /// - `code_challenge`: PKCE code challenge (RFC 7636). Required for all
+    ///   authorization code flows.
+    /// - `code_challenge_method`: PKCE code challenge method. Must be "S256".
+    /// - `redirect_uri`
+    /// - `response_type`
+    /// - `scope`
+    /// - `state`
     /// ```ignore
     /// let response = client.authz_code_redirect()
     ///    .provider(provider)
     ///    .client_id(client_id)
+    ///    .code_challenge(code_challenge)
+    ///    .code_challenge_method(code_challenge_method)
     ///    .redirect_uri(redirect_uri)
     ///    .response_type(response_type)
     ///    .scope(scope)
@@ -10668,6 +10638,8 @@ pub mod builder {
         client: &'a super::Client,
         provider: Result<types::OAuthProviderName, String>,
         client_id: Result<types::TypedUuidForOAuthClientId, String>,
+        code_challenge: Result<::std::string::String, String>,
+        code_challenge_method: Result<::std::string::String, String>,
         redirect_uri: Result<::std::string::String, String>,
         response_type: Result<::std::string::String, String>,
         scope: Result<Option<::std::string::String>, String>,
@@ -10680,6 +10652,8 @@ pub mod builder {
                 client: client,
                 provider: Err("provider was not initialized".to_string()),
                 client_id: Err("client_id was not initialized".to_string()),
+                code_challenge: Err("code_challenge was not initialized".to_string()),
+                code_challenge_method: Err("code_challenge_method was not initialized".to_string()),
                 redirect_uri: Err("redirect_uri was not initialized".to_string()),
                 response_type: Err("response_type was not initialized".to_string()),
                 scope: Ok(None),
@@ -10703,6 +10677,27 @@ pub mod builder {
         {
             self.client_id = value.try_into().map_err(|_| {
                 "conversion to `TypedUuidForOAuthClientId` for client_id failed".to_string()
+            });
+            self
+        }
+
+        pub fn code_challenge<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.code_challenge = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for code_challenge failed".to_string()
+            });
+            self
+        }
+
+        pub fn code_challenge_method<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<::std::string::String>,
+        {
+            self.code_challenge_method = value.try_into().map_err(|_| {
+                "conversion to `:: std :: string :: String` for code_challenge_method failed"
+                    .to_string()
             });
             self
         }
@@ -10753,6 +10748,8 @@ pub mod builder {
                 client,
                 provider,
                 client_id,
+                code_challenge,
+                code_challenge_method,
                 redirect_uri,
                 response_type,
                 scope,
@@ -10760,6 +10757,8 @@ pub mod builder {
             } = self;
             let provider = provider.map_err(Error::InvalidRequest)?;
             let client_id = client_id.map_err(Error::InvalidRequest)?;
+            let code_challenge = code_challenge.map_err(Error::InvalidRequest)?;
+            let code_challenge_method = code_challenge_method.map_err(Error::InvalidRequest)?;
             let redirect_uri = redirect_uri.map_err(Error::InvalidRequest)?;
             let response_type = response_type.map_err(Error::InvalidRequest)?;
             let scope = scope.map_err(Error::InvalidRequest)?;
@@ -10779,6 +10778,14 @@ pub mod builder {
                 .client
                 .get(url)
                 .query(&progenitor_client::QueryParam::new("client_id", &client_id))
+                .query(&progenitor_client::QueryParam::new(
+                    "code_challenge",
+                    &code_challenge,
+                ))
+                .query(&progenitor_client::QueryParam::new(
+                    "code_challenge_method",
+                    &code_challenge_method,
+                ))
                 .query(&progenitor_client::QueryParam::new(
                     "redirect_uri",
                     &redirect_uri,

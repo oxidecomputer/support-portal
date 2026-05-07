@@ -555,6 +555,23 @@ impl<T: CliConfig> Cli<T> {
                     .required(true),
             )
             .arg(
+                ::clap::Arg::new("code-challenge")
+                    .long("code-challenge")
+                    .value_parser(::clap::value_parser!(::std::string::String))
+                    .required(true)
+                    .help(
+                        "PKCE code challenge (RFC 7636). Required for all authorization code \
+                         flows.",
+                    ),
+            )
+            .arg(
+                ::clap::Arg::new("code-challenge-method")
+                    .long("code-challenge-method")
+                    .value_parser(::clap::value_parser!(::std::string::String))
+                    .required(true)
+                    .help("PKCE code challenge method. Must be \"S256\"."),
+            )
+            .arg(
                 ::clap::Arg::new("provider")
                     .long("provider")
                     .value_parser(::clap::builder::TypedValueParser::map(
@@ -660,7 +677,11 @@ impl<T: CliConfig> Cli<T> {
                 ::clap::Arg::new("pkce-verifier")
                     .long("pkce-verifier")
                     .value_parser(::clap::value_parser!(::std::string::String))
-                    .required(false),
+                    .required_unless_present("json-body")
+                    .help(
+                        "PKCE code verifier (RFC 7636). Required for all authorization code \
+                         exchanges.",
+                    ),
             )
             .arg(
                 ::clap::Arg::new("provider")
@@ -1768,6 +1789,14 @@ impl<T: CliConfig> Cli<T> {
         let mut request = self.client.authz_code_redirect();
         if let Some(value) = matches.get_one::<types::TypedUuidForOAuthClientId>("client-id") {
             request = request.client_id(value.clone());
+        }
+
+        if let Some(value) = matches.get_one::<::std::string::String>("code-challenge") {
+            request = request.code_challenge(value.clone());
+        }
+
+        if let Some(value) = matches.get_one::<::std::string::String>("code-challenge-method") {
+            request = request.code_challenge_method(value.clone());
         }
 
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {

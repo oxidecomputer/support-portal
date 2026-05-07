@@ -850,6 +850,24 @@
           },
           {
             "in": "query",
+            "name": "code_challenge",
+            "description": "PKCE code challenge (RFC 7636). Required for all authorization code flows.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "code_challenge_method",
+            "description": "PKCE code challenge method. Must be \"S256\".",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "redirect_uri",
             "required": true,
             "schema": {
@@ -2908,7 +2926,7 @@
             "type": "string"
           },
           "pkce_verifier": {
-            "nullable": true,
+            "description": "PKCE code verifier (RFC 7636). Required for all authorization code exchanges.",
             "type": "string"
           },
           "redirect_uri": {
@@ -2918,6 +2936,7 @@
         "required": [
           "code",
           "grant_type",
+          "pkce_verifier",
           "redirect_uri"
         ]
       },
@@ -3102,9 +3121,6 @@
           "client_id": {
             "type": "string"
           },
-          "client_secret": {
-            "$ref": "#/components/schemas/SecretString"
-          },
           "revocation_endpoint": {
             "nullable": true,
             "type": "string"
@@ -3119,7 +3135,6 @@
         "required": [
           "auth_url_endpoint",
           "client_id",
-          "client_secret",
           "token_endpoint",
           "token_endpoint_content_type"
         ]
@@ -3136,9 +3151,6 @@
           "remote_client_id": {
             "type": "string"
           },
-          "remote_client_secret": {
-            "$ref": "#/components/schemas/SecretString"
-          },
           "revocation_endpoint": {
             "nullable": true,
             "type": "string"
@@ -3154,7 +3166,6 @@
           "client_id",
           "device_code_endpoint",
           "remote_client_id",
-          "remote_client_secret",
           "token_endpoint",
           "token_endpoint_content_type"
         ]
