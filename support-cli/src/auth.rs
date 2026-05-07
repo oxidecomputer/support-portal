@@ -17,7 +17,7 @@ use v_cli_sdk::{VCliConfig, VCliContext, cmd::auth::{login::{CliAdapterToken, Cl
 
 use crate::{config::missing_value, context::{Context, ContextError}};
 
-#[derive(Debug, Clone, Subcommand)]
+#[derive(Debug, Copy, Clone, Subcommand)]
 pub enum LoginProvider {
     /// Google identity provider
     Google,
@@ -71,13 +71,16 @@ impl CliOAuthAdapter for OAuthAdapter {
         let client = self.ctx.client();
         Box::pin(async move {
             let client = client.ok_or(ContextError::NoClient)?;
-            let provider = match provider {
+            let provider_name = match provider {
                 VLoginProvider::Google => OAuthProviderName::Google,
                 VLoginProvider::Zendesk => OAuthProviderName::Zendesk,
                 _ => return Err(ContextError::UnsupportedOAuthProvider),
             };
-            let info = client.get_web_pkce_provider().provider(provider).send().await.unwrap().into_inner();
-            Ok(OAuthProvider::Pkce(info))
+            let info = client.get_web_pkce_provider().provider(provider_name).send().await.unwrap().into_inner();
+            Ok(OAuthProvider {
+                provider,
+                info: OAuthProviderInfo::Pkce(info),
+            })
         })
     }
     fn exchange_authorization_code(
@@ -163,57 +166,65 @@ impl CliMagicLinkAdapter for MagicLinkAdapter {
     }
 }
 
-pub enum OAuthProvider {
+pub struct OAuthProvider {
+    provider: VLoginProvider,
+    info: OAuthProviderInfo
+}
+
+pub enum OAuthProviderInfo {
     Device(OAuthProviderDeviceInfo),
     Pkce(OAuthProviderAuthorizationCodePkceInfo),
 }
 impl CliOAuthProviderInfo for OAuthProvider {
+    fn provider(&self) -> VLoginProvider {
+        self.provider
+    }
     fn remote_client_id(&self) -> &str {
-        match self {
-            Self::Device(inner) => &inner.remote_client_id,
-            Self::Pkce(inner) => &inner.web.remote.client_id,
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => &inner.remote_client_id,
+            OAuthProviderInfo::Pkce(inner) => &inner.web.remote.client_id,
         }
     }
     fn public_pkce_port(&self) -> Option<u16> {
-        match self {
-            Self::Device(_) => None,
-            Self::Pkce(inner) => Some(inner.proxy_port),
+        match &self.info {
+            OAuthProviderInfo::Device(_) => None,
+            OAuthProviderInfo::Pkce(inner) => Some(inner.proxy_port),
         }
     }
     fn supports_pkce_only(&self) -> bool {
-        match self {
-            Self::Device(_) => false,
-            Self::Pkce(_) => true,
+        match &self.info {
+            OAuthProviderInfo::Device(_) => false,
+            OAuthProviderInfo::Pkce(_) => true,
         }
     }
     fn device_code_endpoint(&self) -> Option<&str> {
-        match self {
-            Self::Device(inner) => Some(&inner.device_code_endpoint),
-            Self::Pkce(_) => None,
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => Some(&inner.device_code_endpoint),
+            OAuthProviderInfo::Pkce(_) => None,
         }
     }
     fn auth_url_endpoint(&self) -> Option<&str> {
-        match self {
-            Self::Device(inner) => None,
-            Self::Pkce(inner) => Some(&inner.web.auth_url_endpoint),
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => None,
+            OAuthProviderInfo::Pkce(inner) => Some(&inner.web.auth_url_endpoint),
         }
     }
     fn token_endpoint(&self) -> &str {
-        match self {
-            Self::Device(inner) => &inner.token_endpoint,
-            Self::Pkce(inner) => &inner.web.token_endpoint,
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => &inner.token_endpoint,
+            OAuthProviderInfo::Pkce(inner) => &inner.web.token_endpoint,
         }
     }
     fn redirect_endpoint(&self) -> Option<&str> {
-        match self {
-            Self::Device(inner) => None,
-            Self::Pkce(inner) => Some(&inner.redirect_endpoint),
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => None,
+            OAuthProviderInfo::Pkce(inner) => Some(&inner.redirect_endpoint),
         }
     }
     fn client_id(&self) -> Uuid {
-        match self {
-            Self::Device(inner) => inner.client_id.0,
-            Self::Pkce(inner) => inner.client_id.0,
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => inner.client_id.0,
+            OAuthProviderInfo::Pkce(inner) => inner.client_id.0,
         }
     }
     fn scopes(&self) -> &[String] {
