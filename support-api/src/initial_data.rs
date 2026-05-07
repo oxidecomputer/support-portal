@@ -127,7 +127,8 @@ impl InitialData {
         }
 
         for oauth_client in self.oauth_clients {
-            let span = tracing::info_span!("Initializing OAuth client", oauth_client = ?oauth_client);
+            let span =
+                tracing::info_span!("Initializing OAuth client", oauth_client = ?oauth_client);
             async {
                 ctx.oauth
                     .create_oauth_client(&ctx.builtin_registration_user(), oauth_client.id)
@@ -136,7 +137,11 @@ impl InitialData {
                     .or_else(handle_unique_violation_error)?;
 
                 ctx.oauth
-                    .add_oauth_redirect_uri(&ctx.builtin_registration_user(), &oauth_client.id, &oauth_client.redirect_uri)
+                    .add_oauth_redirect_uri(
+                        &ctx.builtin_registration_user(),
+                        &oauth_client.id,
+                        &oauth_client.redirect_uri,
+                    )
                     .await
                     .map(|_| ())
                     .or_else(handle_unique_violation_error)?;

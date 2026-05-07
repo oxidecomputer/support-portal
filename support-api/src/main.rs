@@ -7,11 +7,11 @@ use dropshot::semver::Version;
 use rustls::crypto;
 use secrecy::ExposeSecret;
 use slog::Drain;
-use support_api::{describe, ServerConfig};
 use std::{
     fs::File,
     path::{Path, PathBuf},
 };
+use support_api::{ServerConfig, describe};
 use tap::TapFallible;
 use tracing_appender::non_blocking::{NonBlocking, WorkerGuard};
 use tracing_slog::TracingSlogDrain;

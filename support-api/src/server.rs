@@ -6,10 +6,7 @@ use dropshot::{ApiDescription, ServerBuilder};
 use slog::Logger;
 use std::net::SocketAddr;
 
-use crate::{
-    context::ApiContext,
-    permissions::ApiPermissions,
-};
+use crate::{context::ApiContext, permissions::ApiPermissions};
 
 pub fn create_server(ctx: ApiContext, logger: Logger, port: u16) -> ServerBuilder<ApiContext> {
     let description = describe();

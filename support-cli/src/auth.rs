@@ -7,15 +7,27 @@ use clap::Subcommand;
 use http::{Request, Response};
 use http_body_util::{BodyExt, Full};
 use hyper::body::{Bytes, Incoming};
-use oauth2::{ClientId, PkceCodeVerifier, basic::BasicClient};
+use oauth2::{basic::BasicClient, ClientId, PkceCodeVerifier};
 
-use support_sdk::types::{OAuthProviderAuthorizationCodePkceInfo, OAuthProviderDeviceInfo, OAuthProviderName, TypedUuidForOAuthClientId};
-use uuid::Uuid;
 use std::{future::Future, ops::Add, pin::Pin, sync::Arc};
+use support_sdk::types::{
+    OAuthProviderAuthorizationCodePkceInfo, OAuthProviderDeviceInfo, OAuthProviderName,
+    TypedUuidForOAuthClientId,
+};
 use thiserror::Error;
-use v_cli_sdk::{VCliConfig, VCliContext, cmd::auth::{login::{CliAdapterToken, CliMagicLinkAdapter, LoginProvider as VLoginProvider}, oauth::{AuthorizationCodeExchange, CliOAuthAdapter, CliOAuthProviderInfo}}};
+use uuid::Uuid;
+use v_cli_sdk::{
+    cmd::auth::{
+        login::{CliAdapterToken, CliMagicLinkAdapter, LoginProvider as VLoginProvider},
+        oauth::{AuthorizationCodeExchange, CliOAuthAdapter, CliOAuthProviderInfo},
+    },
+    VCliConfig, VCliContext,
+};
 
-use crate::{config::missing_value, context::{Context, ContextError}};
+use crate::{
+    config::missing_value,
+    context::{Context, ContextError},
+};
 
 #[derive(Debug, Copy, Clone, Subcommand)]
 pub enum LoginProvider {
@@ -76,7 +88,13 @@ impl CliOAuthAdapter for OAuthAdapter {
                 VLoginProvider::Zendesk => OAuthProviderName::Zendesk,
                 _ => return Err(ContextError::UnsupportedOAuthProvider),
             };
-            let info = client.get_web_pkce_provider().provider(provider_name).send().await.unwrap().into_inner();
+            let info = client
+                .get_web_pkce_provider()
+                .provider(provider_name)
+                .send()
+                .await
+                .unwrap()
+                .into_inner();
             Ok(OAuthProvider {
                 provider,
                 info: OAuthProviderInfo::Pkce(info),
@@ -100,8 +118,7 @@ impl CliOAuthAdapter for OAuthAdapter {
                 .provider(provider)
                 .request_idp_token(exchange.request_idp_token)
                 .body_map(|body| {
-                    body
-                        .client_id(TypedUuidForOAuthClientId(exchange.client_id))
+                    body.client_id(TypedUuidForOAuthClientId(exchange.client_id))
                         .code(exchange.code)
                         .redirect_uri(exchange.redirect_uri)
                         .grant_type(exchange.grant_type)
@@ -123,10 +140,16 @@ impl CliOAuthAdapter for OAuthAdapter {
     ) -> Pin<Box<dyn Future<Output = Result<Self::LongToken, Self::Error>> + Send>> {
         let client = self.ctx.client();
         let token = access_token.to_string();
-        let host = self.ctx.config().host().map(|s| s.to_string()).ok_or(ContextError::NoHost);
+        let host = self
+            .ctx
+            .config()
+            .host()
+            .map(|s| s.to_string())
+            .ok_or(ContextError::NoHost);
 
         Box::pin(async move {
-            let client = Context::new_client(&host?, Some(&token)).map_err(|_| ContextError::NoClient)?;
+            let client =
+                Context::new_client(&host?, Some(&token)).map_err(|_| ContextError::NoClient)?;
             let user = client.get_self().send().await?;
             let key = client
                 .create_api_user_token()
@@ -168,7 +191,7 @@ impl CliMagicLinkAdapter for MagicLinkAdapter {
 
 pub struct OAuthProvider {
     provider: VLoginProvider,
-    info: OAuthProviderInfo
+    info: OAuthProviderInfo,
 }
 
 pub enum OAuthProviderInfo {

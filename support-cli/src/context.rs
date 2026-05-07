@@ -7,9 +7,18 @@ use reqwest::header::AUTHORIZATION;
 use std::{sync::Arc, time::Duration};
 use support_sdk::Client;
 use thiserror::Error;
-use v_cli_sdk::{VCliContext, VCliConfig, VerbosityLevel, cmd::auth::{login::CliMagicLinkAdapter, oauth::CliOAuthAdapter}, printer::Printer};
+use v_cli_sdk::{
+    cmd::auth::{login::CliMagicLinkAdapter, oauth::CliOAuthAdapter},
+    printer::Printer,
+    VCliConfig, VCliContext, VerbosityLevel,
+};
 
-use crate::{auth::{AdapterToken, MagicLinkAdapter, OAuthAdapter}, config::missing_value, generated::cli::CliConfig, config::Config};
+use crate::{
+    auth::{AdapterToken, MagicLinkAdapter, OAuthAdapter},
+    config::missing_value,
+    config::Config,
+    generated::cli::CliConfig,
+};
 
 #[derive(Debug, Error)]
 pub enum ContextError {
@@ -88,7 +97,11 @@ impl VCliContext<support_sdk::Client, Printer> for Context {
         &mut self.config
     }
     fn client(&self) -> Option<support_sdk::Client> {
-        let client = Self::new_client(self.config.host().ok_or(missing_value("host")).ok()?, self.config.token()).ok()?;
+        let client = Self::new_client(
+            self.config.host().ok_or(missing_value("host")).ok()?,
+            self.config.token(),
+        )
+        .ok()?;
         Some(client)
     }
     fn printer(&self) -> Option<&Printer> {
@@ -100,12 +113,19 @@ impl VCliContext<support_sdk::Client, Printer> for Context {
 
     fn oauth_adapter(
         &self,
-    ) -> impl CliOAuthAdapter<ShortToken = Self::ShortToken, LongToken = Self::LongToken, Error = Self::Error> + Send + Sync + 'static {
+    ) -> impl CliOAuthAdapter<
+        ShortToken = Self::ShortToken,
+        LongToken = Self::LongToken,
+        Error = Self::Error,
+    > + Send
+           + Sync
+           + 'static {
         OAuthAdapter::new(self.clone())
     }
     fn mlink_adapter(
         &self,
-    ) -> impl CliMagicLinkAdapter<Token = Self::LongToken, Error = Self::Error> + Send + Sync + 'static {
+    ) -> impl CliMagicLinkAdapter<Token = Self::LongToken, Error = Self::Error> + Send + Sync + 'static
+    {
         MagicLinkAdapter {}
     }
 }

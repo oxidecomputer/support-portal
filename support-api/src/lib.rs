@@ -20,7 +20,8 @@ use v_api_param::ParamResolutionError;
 
 use crate::{
     context::{ApiContextBuilder, ApiContextBuilderError},
-    initial_data::{InitError, InitialData}, permissions::ApiPermissions,
+    initial_data::{InitError, InitialData},
+    permissions::ApiPermissions,
 };
 
 pub mod config;

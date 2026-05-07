@@ -4,20 +4,20 @@
 
 #![allow(unused)]
 
-use anyhow::{Result, anyhow};
-use clap::{Arg, ArgAction, Command, CommandFactory, FromArgMatches, ValueEnum, value_parser};
-use clap_complete::{Shell, generate};
+use anyhow::{anyhow, Result};
+use clap::{value_parser, Arg, ArgAction, Command, CommandFactory, FromArgMatches, ValueEnum};
+use clap_complete::{generate, Shell};
 use generated::cli::{CliConfig as ProgenitorCliConfig, *};
-use owo_colors::OwoColorize;
 use owo_colors::colors::xterm::DarkGreen;
-use reqwest::header::{AUTHORIZATION, HeaderMap, HeaderValue};
+use owo_colors::OwoColorize;
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
-use support_sdk::Client;
 use std::fmt::{Debug, Display};
 use std::time::Duration;
 use std::{collections::HashMap, error::Error};
-use v_cli_sdk::{VCliContext, VCliConfig, FormatStyle, VerbosityLevel, printer::Printer};
+use support_sdk::Client;
+use v_cli_sdk::{printer::Printer, FormatStyle, VCliConfig, VCliContext, VerbosityLevel};
 
 use crate::auth::LoginProvider;
 use crate::context::Context;
@@ -53,7 +53,6 @@ impl<'a> Tree<'a> {
 
 fn cmd_path<'a>(cmd: &CliCommand) -> Option<&'a str> {
     match cmd {
-
         // User commands
         CliCommand::CreateApiUser => Some("sys user create"),
         CliCommand::CreateApiUserToken => Some("sys user token create"),

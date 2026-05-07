@@ -2,9 +2,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-use std::{fs::{File as StdFile, OpenOptions, create_dir_all}, io::Write, path::PathBuf};
 use config::{Environment, File};
 use serde::{Deserialize, Serialize};
+use std::{
+    fs::{create_dir_all, File as StdFile, OpenOptions},
+    io::Write,
+    path::PathBuf,
+};
 use v_cli_sdk::{FormatStyle, VCliConfig};
 
 pub fn missing_value(key: &str) -> anyhow::Error {
@@ -17,7 +21,7 @@ pub struct Config {
     token: Option<String>,
     default_format: Option<FormatStyle>,
     mlink_redirect: Option<String>,
-    mlink_secret: Option<String>
+    mlink_secret: Option<String>,
 }
 
 impl Config {
