@@ -991,7 +991,6 @@
           {
             "in": "query",
             "name": "request_idp_token",
-            "required": true,
             "schema": {
               "type": "boolean"
             }
@@ -1037,7 +1036,7 @@
     },
     "/login/oauth/{provider}/device": {
       "get": {
-        "summary": "Retrieve the metadata about an OAuth provider for limited input flow",
+        "summary": "Retrieve the metadata about an OAuth provider for device authorization flow",
         "operationId": "get_device_provider",
         "parameters": [
           {
@@ -1067,11 +1066,47 @@
             "$ref": "#/components/responses/Error"
           }
         }
+      },
+      "post": {
+        "summary": "Initiate a device authorization flow by proxying the request to the",
+        "description": "upstream OAuth provider. Creates a login attempt and returns the upstream device authorization response.",
+        "operationId": "device_authz",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OAuthProviderName"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceAuthorizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            }
+          }
+        }
       }
     },
     "/login/oauth/{provider}/device/exchange": {
       "post": {
-        "summary": "Exchange an OAuth device code request for an access token",
+        "summary": "Exchange an OAuth device code for an access token. The client polls",
+        "description": "this endpoint until the user completes authorization.",
         "operationId": "exchange_device_token",
         "parameters": [
           {
@@ -1087,7 +1122,7 @@
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/AccessTokenExchangeRequest"
+                "$ref": "#/components/schemas/DeviceTokenExchangeRequest"
               }
             }
           },
@@ -1815,26 +1850,6 @@
           "updated_at"
         ]
       },
-      "AccessTokenExchangeRequest": {
-        "type": "object",
-        "properties": {
-          "device_code": {
-            "type": "string"
-          },
-          "expires_at": {
-            "nullable": true,
-            "type": "string",
-            "format": "date-time"
-          },
-          "grant_type": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "device_code",
-          "grant_type"
-        ]
-      },
       "AddGroupBody": {
         "type": "object",
         "properties": {
@@ -2510,6 +2525,46 @@
           "rule"
         ]
       },
+      "DeviceAuthorizationRequest": {
+        "description": "Request body for initiating a device authorization flow. The client sends its `client_id` and an optional `scope`. The API server proxies the device authorization request to the upstream provider and tracks it as a login attempt.",
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "$ref": "#/components/schemas/TypedUuidForOAuthClientId"
+          },
+          "scope": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_id"
+        ]
+      },
+      "DeviceTokenExchangeRequest": {
+        "description": "Request body for the device token exchange. The client polls this endpoint with the device_code received from the authorization step.",
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "$ref": "#/components/schemas/TypedUuidForOAuthClientId"
+          },
+          "device_code": {
+            "type": "string"
+          },
+          "grant_type": {
+            "type": "string"
+          },
+          "pkce_verifier": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_id",
+          "device_code",
+          "grant_type"
+        ]
+      },
       "Error": {
         "description": "Error information from a response.",
         "type": "object",
@@ -2954,6 +3009,10 @@
             "nullable": true,
             "type": "string"
           },
+          "scope": {
+            "description": "The scope granted to the access token (RFC 6749 §5.1).",
+            "type": "string"
+          },
           "token_type": {
             "type": "string"
           }
@@ -2961,6 +3020,7 @@
         "required": [
           "access_token",
           "expires_in",
+          "scope",
           "token_type"
         ]
       },
@@ -3069,9 +3129,6 @@
           "redirect_endpoint": {
             "type": "string"
           },
-          "remote": {
-            "$ref": "#/components/schemas/OAuthProviderAuthorizationCodeRemoteInfo"
-          },
           "token_endpoint": {
             "type": "string"
           },
@@ -3082,7 +3139,6 @@
         "required": [
           "auth_url_endpoint",
           "redirect_endpoint",
-          "remote",
           "token_endpoint",
           "token_endpoint_content_type"
         ]
@@ -3112,62 +3168,23 @@
           "web"
         ]
       },
-      "OAuthProviderAuthorizationCodeRemoteInfo": {
+      "OAuthProviderDeviceInfo": {
         "type": "object",
         "properties": {
           "auth_url_endpoint": {
             "type": "string"
           },
           "client_id": {
-            "type": "string"
-          },
-          "revocation_endpoint": {
-            "nullable": true,
-            "type": "string"
+            "$ref": "#/components/schemas/TypedUuidForOAuthClientId"
           },
           "token_endpoint": {
-            "type": "string"
-          },
-          "token_endpoint_content_type": {
             "type": "string"
           }
         },
         "required": [
           "auth_url_endpoint",
           "client_id",
-          "token_endpoint",
-          "token_endpoint_content_type"
-        ]
-      },
-      "OAuthProviderDeviceInfo": {
-        "type": "object",
-        "properties": {
-          "client_id": {
-            "$ref": "#/components/schemas/TypedUuidForOAuthClientId"
-          },
-          "device_code_endpoint": {
-            "type": "string"
-          },
-          "remote_client_id": {
-            "type": "string"
-          },
-          "revocation_endpoint": {
-            "nullable": true,
-            "type": "string"
-          },
-          "token_endpoint": {
-            "type": "string"
-          },
-          "token_endpoint_content_type": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "client_id",
-          "device_code_endpoint",
-          "remote_client_id",
-          "token_endpoint",
-          "token_endpoint_content_type"
+          "token_endpoint"
         ]
       },
       "OAuthRedirectUriId": {

@@ -166,54 +166,6 @@ pub mod types {
         }
     }
 
-    /// `AccessTokenExchangeRequest`
-    ///
-    /// <details><summary>JSON schema</summary>
-    ///
-    /// ```json
-    /// {
-    ///  "type": "object",
-    ///  "required": [
-    ///    "device_code",
-    ///    "grant_type"
-    ///  ],
-    ///  "properties": {
-    ///    "device_code": {
-    ///      "type": "string"
-    ///    },
-    ///    "expires_at": {
-    ///      "type": [
-    ///        "string",
-    ///        "null"
-    ///      ],
-    ///      "format": "date-time"
-    ///    },
-    ///    "grant_type": {
-    ///      "type": "string"
-    ///    }
-
-    ///  }
-
-    /// }
-
-    /// ```
-    /// </details>
-    #[derive(
-        :: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, schemars :: JsonSchema,
-    )]
-    pub struct AccessTokenExchangeRequest {
-        pub device_code: ::std::string::String,
-        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub expires_at: ::std::option::Option<::chrono::DateTime<::chrono::offset::Utc>>,
-        pub grant_type: ::std::string::String,
-    }
-
-    impl AccessTokenExchangeRequest {
-        pub fn builder() -> builder::AccessTokenExchangeRequest {
-            Default::default()
-        }
-    }
-
     /// `AddGroupBody`
     ///
     /// <details><summary>JSON schema</summary>
@@ -1412,6 +1364,111 @@ pub mod types {
         }
     }
 
+    /// Request body for initiating a device authorization flow. The client
+    /// sends its `client_id` and an optional `scope`. The API server proxies
+    /// the device authorization request to the upstream provider and tracks it
+    /// as a login attempt.
+    ///
+    /// <details><summary>JSON schema</summary>
+    ///
+    /// ```json
+    /// {
+    ///  "description": "Request body for initiating a device authorization
+    /// flow. The client sends its `client_id` and an optional `scope`. The API
+    /// server proxies the device authorization request to the upstream provider
+    /// and tracks it as a login attempt.",
+    ///  "type": "object",
+    ///  "required": [
+    ///    "client_id"
+    ///  ],
+    ///  "properties": {
+    ///    "client_id": {
+    ///      "$ref": "#/components/schemas/TypedUuidForOAuthClientId"
+    ///    },
+    ///    "scope": {
+    ///      "type": [
+    ///        "string",
+    ///        "null"
+    ///      ]
+    ///    }
+
+    ///  }
+
+    /// }
+
+    /// ```
+    /// </details>
+    #[derive(
+        :: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, schemars :: JsonSchema,
+    )]
+    pub struct DeviceAuthorizationRequest {
+        pub client_id: TypedUuidForOAuthClientId,
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub scope: ::std::option::Option<::std::string::String>,
+    }
+
+    impl DeviceAuthorizationRequest {
+        pub fn builder() -> builder::DeviceAuthorizationRequest {
+            Default::default()
+        }
+    }
+
+    /// Request body for the device token exchange. The client polls this
+    /// endpoint with the device_code received from the authorization step.
+    ///
+    /// <details><summary>JSON schema</summary>
+    ///
+    /// ```json
+    /// {
+    ///  "description": "Request body for the device token exchange. The client
+    /// polls this endpoint with the device_code received from the authorization
+    /// step.",
+    ///  "type": "object",
+    ///  "required": [
+    ///    "client_id",
+    ///    "device_code",
+    ///    "grant_type"
+    ///  ],
+    ///  "properties": {
+    ///    "client_id": {
+    ///      "$ref": "#/components/schemas/TypedUuidForOAuthClientId"
+    ///    },
+    ///    "device_code": {
+    ///      "type": "string"
+    ///    },
+    ///    "grant_type": {
+    ///      "type": "string"
+    ///    },
+    ///    "pkce_verifier": {
+    ///      "type": [
+    ///        "string",
+    ///        "null"
+    ///      ]
+    ///    }
+
+    ///  }
+
+    /// }
+
+    /// ```
+    /// </details>
+    #[derive(
+        :: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, schemars :: JsonSchema,
+    )]
+    pub struct DeviceTokenExchangeRequest {
+        pub client_id: TypedUuidForOAuthClientId,
+        pub device_code: ::std::string::String,
+        pub grant_type: ::std::string::String,
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub pkce_verifier: ::std::option::Option<::std::string::String>,
+    }
+
+    impl DeviceTokenExchangeRequest {
+        pub fn builder() -> builder::DeviceTokenExchangeRequest {
+            Default::default()
+        }
+    }
+
     /// Error information from a response.
     ///
     /// <details><summary>JSON schema</summary>
@@ -2503,6 +2560,7 @@ pub mod types {
     ///  "required": [
     ///    "access_token",
     ///    "expires_in",
+    ///    "scope",
     ///    "token_type"
     ///  ],
     ///  "properties": {
@@ -2518,6 +2576,11 @@ pub mod types {
     ///        "string",
     ///        "null"
     ///      ]
+    ///    },
+    ///    "scope": {
+    ///      "description": "The scope granted to the access token (RFC 6749
+    /// §5.1).",
+    ///      "type": "string"
     ///    },
     ///    "token_type": {
     ///      "type": "string"
@@ -2537,6 +2600,8 @@ pub mod types {
         pub expires_in: i64,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub idp_token: ::std::option::Option<::std::string::String>,
+        /// The scope granted to the access token (RFC 6749 §5.1).
+        pub scope: ::std::string::String,
         pub token_type: ::std::string::String,
     }
 
@@ -2765,7 +2830,6 @@ pub mod types {
     ///  "required": [
     ///    "auth_url_endpoint",
     ///    "redirect_endpoint",
-    ///    "remote",
     ///    "token_endpoint",
     ///    "token_endpoint_content_type"
     ///  ],
@@ -2775,10 +2839,6 @@ pub mod types {
     ///    },
     ///    "redirect_endpoint": {
     ///      "type": "string"
-    ///    },
-    ///    "remote": {
-    ///      "$ref":
-    /// "#/components/schemas/OAuthProviderAuthorizationCodeRemoteInfo"
     ///    },
     ///    "token_endpoint": {
     ///      "type": "string"
@@ -2799,7 +2859,6 @@ pub mod types {
     pub struct OAuthProviderAuthorizationCodeInfo {
         pub auth_url_endpoint: ::std::string::String,
         pub redirect_endpoint: ::std::string::String,
-        pub remote: OAuthProviderAuthorizationCodeRemoteInfo,
         pub token_endpoint: ::std::string::String,
         pub token_endpoint_content_type: ::std::string::String,
     }
@@ -2861,7 +2920,7 @@ pub mod types {
         }
     }
 
-    /// `OAuthProviderAuthorizationCodeRemoteInfo`
+    /// `OAuthProviderDeviceInfo`
     ///
     /// <details><summary>JSON schema</summary>
     ///
@@ -2871,87 +2930,16 @@ pub mod types {
     ///  "required": [
     ///    "auth_url_endpoint",
     ///    "client_id",
-    ///    "token_endpoint",
-    ///    "token_endpoint_content_type"
+    ///    "token_endpoint"
     ///  ],
     ///  "properties": {
     ///    "auth_url_endpoint": {
     ///      "type": "string"
     ///    },
     ///    "client_id": {
-    ///      "type": "string"
-    ///    },
-    ///    "revocation_endpoint": {
-    ///      "type": [
-    ///        "string",
-    ///        "null"
-    ///      ]
-    ///    },
-    ///    "token_endpoint": {
-    ///      "type": "string"
-    ///    },
-    ///    "token_endpoint_content_type": {
-    ///      "type": "string"
-    ///    }
-
-    ///  }
-
-    /// }
-
-    /// ```
-    /// </details>
-    #[derive(
-        :: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, schemars :: JsonSchema,
-    )]
-    pub struct OAuthProviderAuthorizationCodeRemoteInfo {
-        pub auth_url_endpoint: ::std::string::String,
-        pub client_id: ::std::string::String,
-        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub revocation_endpoint: ::std::option::Option<::std::string::String>,
-        pub token_endpoint: ::std::string::String,
-        pub token_endpoint_content_type: ::std::string::String,
-    }
-
-    impl OAuthProviderAuthorizationCodeRemoteInfo {
-        pub fn builder() -> builder::OAuthProviderAuthorizationCodeRemoteInfo {
-            Default::default()
-        }
-    }
-
-    /// `OAuthProviderDeviceInfo`
-    ///
-    /// <details><summary>JSON schema</summary>
-    ///
-    /// ```json
-    /// {
-    ///  "type": "object",
-    ///  "required": [
-    ///    "client_id",
-    ///    "device_code_endpoint",
-    ///    "remote_client_id",
-    ///    "token_endpoint",
-    ///    "token_endpoint_content_type"
-    ///  ],
-    ///  "properties": {
-    ///    "client_id": {
     ///      "$ref": "#/components/schemas/TypedUuidForOAuthClientId"
     ///    },
-    ///    "device_code_endpoint": {
-    ///      "type": "string"
-    ///    },
-    ///    "remote_client_id": {
-    ///      "type": "string"
-    ///    },
-    ///    "revocation_endpoint": {
-    ///      "type": [
-    ///        "string",
-    ///        "null"
-    ///      ]
-    ///    },
     ///    "token_endpoint": {
-    ///      "type": "string"
-    ///    },
-    ///    "token_endpoint_content_type": {
     ///      "type": "string"
     ///    }
 
@@ -2965,13 +2953,9 @@ pub mod types {
         :: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, schemars :: JsonSchema,
     )]
     pub struct OAuthProviderDeviceInfo {
+        pub auth_url_endpoint: ::std::string::String,
         pub client_id: TypedUuidForOAuthClientId,
-        pub device_code_endpoint: ::std::string::String,
-        pub remote_client_id: ::std::string::String,
-        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub revocation_endpoint: ::std::option::Option<::std::string::String>,
         pub token_endpoint: ::std::string::String,
-        pub token_endpoint_content_type: ::std::string::String,
     }
 
     impl OAuthProviderDeviceInfo {
@@ -4385,84 +4369,6 @@ pub mod types {
         }
 
         #[derive(Clone, Debug)]
-        pub struct AccessTokenExchangeRequest {
-            device_code: ::std::result::Result<::std::string::String, ::std::string::String>,
-            expires_at: ::std::result::Result<
-                ::std::option::Option<::chrono::DateTime<::chrono::offset::Utc>>,
-                ::std::string::String,
-            >,
-            grant_type: ::std::result::Result<::std::string::String, ::std::string::String>,
-        }
-
-        impl ::std::default::Default for AccessTokenExchangeRequest {
-            fn default() -> Self {
-                Self {
-                    device_code: Err("no value supplied for device_code".to_string()),
-                    expires_at: Ok(Default::default()),
-                    grant_type: Err("no value supplied for grant_type".to_string()),
-                }
-            }
-        }
-
-        impl AccessTokenExchangeRequest {
-            pub fn device_code<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.device_code = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for device_code: {e}"));
-                self
-            }
-            pub fn expires_at<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<
-                        ::std::option::Option<::chrono::DateTime<::chrono::offset::Utc>>,
-                    >,
-                T::Error: ::std::fmt::Display,
-            {
-                self.expires_at = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for expires_at: {e}"));
-                self
-            }
-            pub fn grant_type<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.grant_type = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for grant_type: {e}"));
-                self
-            }
-        }
-
-        impl ::std::convert::TryFrom<AccessTokenExchangeRequest> for super::AccessTokenExchangeRequest {
-            type Error = super::error::ConversionError;
-            fn try_from(
-                value: AccessTokenExchangeRequest,
-            ) -> ::std::result::Result<Self, super::error::ConversionError> {
-                Ok(Self {
-                    device_code: value.device_code?,
-                    expires_at: value.expires_at?,
-                    grant_type: value.grant_type?,
-                })
-            }
-        }
-
-        impl ::std::convert::From<super::AccessTokenExchangeRequest> for AccessTokenExchangeRequest {
-            fn from(value: super::AccessTokenExchangeRequest) -> Self {
-                Self {
-                    device_code: Ok(value.device_code),
-                    expires_at: Ok(value.expires_at),
-                    grant_type: Ok(value.grant_type),
-                }
-            }
-        }
-
-        #[derive(Clone, Debug)]
         pub struct AddGroupBody {
             group_id:
                 ::std::result::Result<super::TypedUuidForAccessGroupId, ::std::string::String>,
@@ -5497,6 +5403,160 @@ pub mod types {
                     max_activations: Ok(value.max_activations),
                     name: Ok(value.name),
                     rule: Ok(value.rule),
+                }
+            }
+        }
+
+        #[derive(Clone, Debug)]
+        pub struct DeviceAuthorizationRequest {
+            client_id:
+                ::std::result::Result<super::TypedUuidForOAuthClientId, ::std::string::String>,
+            scope: ::std::result::Result<
+                ::std::option::Option<::std::string::String>,
+                ::std::string::String,
+            >,
+        }
+
+        impl ::std::default::Default for DeviceAuthorizationRequest {
+            fn default() -> Self {
+                Self {
+                    client_id: Err("no value supplied for client_id".to_string()),
+                    scope: Ok(Default::default()),
+                }
+            }
+        }
+
+        impl DeviceAuthorizationRequest {
+            pub fn client_id<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<super::TypedUuidForOAuthClientId>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.client_id = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for client_id: {e}"));
+                self
+            }
+            pub fn scope<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.scope = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for scope: {e}"));
+                self
+            }
+        }
+
+        impl ::std::convert::TryFrom<DeviceAuthorizationRequest> for super::DeviceAuthorizationRequest {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: DeviceAuthorizationRequest,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    client_id: value.client_id?,
+                    scope: value.scope?,
+                })
+            }
+        }
+
+        impl ::std::convert::From<super::DeviceAuthorizationRequest> for DeviceAuthorizationRequest {
+            fn from(value: super::DeviceAuthorizationRequest) -> Self {
+                Self {
+                    client_id: Ok(value.client_id),
+                    scope: Ok(value.scope),
+                }
+            }
+        }
+
+        #[derive(Clone, Debug)]
+        pub struct DeviceTokenExchangeRequest {
+            client_id:
+                ::std::result::Result<super::TypedUuidForOAuthClientId, ::std::string::String>,
+            device_code: ::std::result::Result<::std::string::String, ::std::string::String>,
+            grant_type: ::std::result::Result<::std::string::String, ::std::string::String>,
+            pkce_verifier: ::std::result::Result<
+                ::std::option::Option<::std::string::String>,
+                ::std::string::String,
+            >,
+        }
+
+        impl ::std::default::Default for DeviceTokenExchangeRequest {
+            fn default() -> Self {
+                Self {
+                    client_id: Err("no value supplied for client_id".to_string()),
+                    device_code: Err("no value supplied for device_code".to_string()),
+                    grant_type: Err("no value supplied for grant_type".to_string()),
+                    pkce_verifier: Ok(Default::default()),
+                }
+            }
+        }
+
+        impl DeviceTokenExchangeRequest {
+            pub fn client_id<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<super::TypedUuidForOAuthClientId>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.client_id = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for client_id: {e}"));
+                self
+            }
+            pub fn device_code<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::string::String>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.device_code = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for device_code: {e}"));
+                self
+            }
+            pub fn grant_type<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::string::String>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.grant_type = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for grant_type: {e}"));
+                self
+            }
+            pub fn pkce_verifier<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.pkce_verifier = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for pkce_verifier: {e}"));
+                self
+            }
+        }
+
+        impl ::std::convert::TryFrom<DeviceTokenExchangeRequest> for super::DeviceTokenExchangeRequest {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: DeviceTokenExchangeRequest,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    client_id: value.client_id?,
+                    device_code: value.device_code?,
+                    grant_type: value.grant_type?,
+                    pkce_verifier: value.pkce_verifier?,
+                })
+            }
+        }
+
+        impl ::std::convert::From<super::DeviceTokenExchangeRequest> for DeviceTokenExchangeRequest {
+            fn from(value: super::DeviceTokenExchangeRequest) -> Self {
+                Self {
+                    client_id: Ok(value.client_id),
+                    device_code: Ok(value.device_code),
+                    grant_type: Ok(value.grant_type),
+                    pkce_verifier: Ok(value.pkce_verifier),
                 }
             }
         }
@@ -6998,6 +7058,7 @@ pub mod types {
                 ::std::option::Option<::std::string::String>,
                 ::std::string::String,
             >,
+            scope: ::std::result::Result<::std::string::String, ::std::string::String>,
             token_type: ::std::result::Result<::std::string::String, ::std::string::String>,
         }
 
@@ -7007,6 +7068,7 @@ pub mod types {
                     access_token: Err("no value supplied for access_token".to_string()),
                     expires_in: Err("no value supplied for expires_in".to_string()),
                     idp_token: Ok(Default::default()),
+                    scope: Err("no value supplied for scope".to_string()),
                     token_type: Err("no value supplied for token_type".to_string()),
                 }
             }
@@ -7043,6 +7105,16 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for idp_token: {e}"));
                 self
             }
+            pub fn scope<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::string::String>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.scope = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for scope: {e}"));
+                self
+            }
             pub fn token_type<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<::std::string::String>,
@@ -7066,6 +7138,7 @@ pub mod types {
                     access_token: value.access_token?,
                     expires_in: value.expires_in?,
                     idp_token: value.idp_token?,
+                    scope: value.scope?,
                     token_type: value.token_type?,
                 })
             }
@@ -7079,6 +7152,7 @@ pub mod types {
                     access_token: Ok(value.access_token),
                     expires_in: Ok(value.expires_in),
                     idp_token: Ok(value.idp_token),
+                    scope: Ok(value.scope),
                     token_type: Ok(value.token_type),
                 }
             }
@@ -7423,10 +7497,6 @@ pub mod types {
         pub struct OAuthProviderAuthorizationCodeInfo {
             auth_url_endpoint: ::std::result::Result<::std::string::String, ::std::string::String>,
             redirect_endpoint: ::std::result::Result<::std::string::String, ::std::string::String>,
-            remote: ::std::result::Result<
-                super::OAuthProviderAuthorizationCodeRemoteInfo,
-                ::std::string::String,
-            >,
             token_endpoint: ::std::result::Result<::std::string::String, ::std::string::String>,
             token_endpoint_content_type:
                 ::std::result::Result<::std::string::String, ::std::string::String>,
@@ -7437,7 +7507,6 @@ pub mod types {
                 Self {
                     auth_url_endpoint: Err("no value supplied for auth_url_endpoint".to_string()),
                     redirect_endpoint: Err("no value supplied for redirect_endpoint".to_string()),
-                    remote: Err("no value supplied for remote".to_string()),
                     token_endpoint: Err("no value supplied for token_endpoint".to_string()),
                     token_endpoint_content_type: Err("no value supplied for \
                                                       token_endpoint_content_type"
@@ -7465,16 +7534,6 @@ pub mod types {
                 self.redirect_endpoint = value.try_into().map_err(|e| {
                     format!("error converting supplied value for redirect_endpoint: {e}")
                 });
-                self
-            }
-            pub fn remote<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<super::OAuthProviderAuthorizationCodeRemoteInfo>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.remote = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for remote: {e}"));
                 self
             }
             pub fn token_endpoint<T>(mut self, value: T) -> Self
@@ -7509,7 +7568,6 @@ pub mod types {
                 Ok(Self {
                     auth_url_endpoint: value.auth_url_endpoint?,
                     redirect_endpoint: value.redirect_endpoint?,
-                    remote: value.remote?,
                     token_endpoint: value.token_endpoint?,
                     token_endpoint_content_type: value.token_endpoint_content_type?,
                 })
@@ -7523,7 +7581,6 @@ pub mod types {
                 Self {
                     auth_url_endpoint: Ok(value.auth_url_endpoint),
                     redirect_endpoint: Ok(value.redirect_endpoint),
-                    remote: Ok(value.remote),
                     token_endpoint: Ok(value.token_endpoint),
                     token_endpoint_content_type: Ok(value.token_endpoint_content_type),
                 }
@@ -7626,33 +7683,24 @@ pub mod types {
         }
 
         #[derive(Clone, Debug)]
-        pub struct OAuthProviderAuthorizationCodeRemoteInfo {
+        pub struct OAuthProviderDeviceInfo {
             auth_url_endpoint: ::std::result::Result<::std::string::String, ::std::string::String>,
-            client_id: ::std::result::Result<::std::string::String, ::std::string::String>,
-            revocation_endpoint: ::std::result::Result<
-                ::std::option::Option<::std::string::String>,
-                ::std::string::String,
-            >,
+            client_id:
+                ::std::result::Result<super::TypedUuidForOAuthClientId, ::std::string::String>,
             token_endpoint: ::std::result::Result<::std::string::String, ::std::string::String>,
-            token_endpoint_content_type:
-                ::std::result::Result<::std::string::String, ::std::string::String>,
         }
 
-        impl ::std::default::Default for OAuthProviderAuthorizationCodeRemoteInfo {
+        impl ::std::default::Default for OAuthProviderDeviceInfo {
             fn default() -> Self {
                 Self {
                     auth_url_endpoint: Err("no value supplied for auth_url_endpoint".to_string()),
                     client_id: Err("no value supplied for client_id".to_string()),
-                    revocation_endpoint: Ok(Default::default()),
                     token_endpoint: Err("no value supplied for token_endpoint".to_string()),
-                    token_endpoint_content_type: Err("no value supplied for \
-                                                      token_endpoint_content_type"
-                        .to_string()),
                 }
             }
         }
 
-        impl OAuthProviderAuthorizationCodeRemoteInfo {
+        impl OAuthProviderDeviceInfo {
             pub fn auth_url_endpoint<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<::std::string::String>,
@@ -7665,113 +7713,6 @@ pub mod types {
             }
             pub fn client_id<T>(mut self, value: T) -> Self
             where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.client_id = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for client_id: {e}"));
-                self
-            }
-            pub fn revocation_endpoint<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.revocation_endpoint = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for revocation_endpoint: {e}")
-                });
-                self
-            }
-            pub fn token_endpoint<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.token_endpoint = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for token_endpoint: {e}")
-                });
-                self
-            }
-            pub fn token_endpoint_content_type<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.token_endpoint_content_type = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for token_endpoint_content_type: {e}")
-                });
-                self
-            }
-        }
-
-        impl ::std::convert::TryFrom<OAuthProviderAuthorizationCodeRemoteInfo>
-            for super::OAuthProviderAuthorizationCodeRemoteInfo
-        {
-            type Error = super::error::ConversionError;
-            fn try_from(
-                value: OAuthProviderAuthorizationCodeRemoteInfo,
-            ) -> ::std::result::Result<Self, super::error::ConversionError> {
-                Ok(Self {
-                    auth_url_endpoint: value.auth_url_endpoint?,
-                    client_id: value.client_id?,
-                    revocation_endpoint: value.revocation_endpoint?,
-                    token_endpoint: value.token_endpoint?,
-                    token_endpoint_content_type: value.token_endpoint_content_type?,
-                })
-            }
-        }
-
-        impl ::std::convert::From<super::OAuthProviderAuthorizationCodeRemoteInfo>
-            for OAuthProviderAuthorizationCodeRemoteInfo
-        {
-            fn from(value: super::OAuthProviderAuthorizationCodeRemoteInfo) -> Self {
-                Self {
-                    auth_url_endpoint: Ok(value.auth_url_endpoint),
-                    client_id: Ok(value.client_id),
-                    revocation_endpoint: Ok(value.revocation_endpoint),
-                    token_endpoint: Ok(value.token_endpoint),
-                    token_endpoint_content_type: Ok(value.token_endpoint_content_type),
-                }
-            }
-        }
-
-        #[derive(Clone, Debug)]
-        pub struct OAuthProviderDeviceInfo {
-            client_id:
-                ::std::result::Result<super::TypedUuidForOAuthClientId, ::std::string::String>,
-            device_code_endpoint:
-                ::std::result::Result<::std::string::String, ::std::string::String>,
-            remote_client_id: ::std::result::Result<::std::string::String, ::std::string::String>,
-            revocation_endpoint: ::std::result::Result<
-                ::std::option::Option<::std::string::String>,
-                ::std::string::String,
-            >,
-            token_endpoint: ::std::result::Result<::std::string::String, ::std::string::String>,
-            token_endpoint_content_type:
-                ::std::result::Result<::std::string::String, ::std::string::String>,
-        }
-
-        impl ::std::default::Default for OAuthProviderDeviceInfo {
-            fn default() -> Self {
-                Self {
-                    client_id: Err("no value supplied for client_id".to_string()),
-                    device_code_endpoint: Err(
-                        "no value supplied for device_code_endpoint".to_string()
-                    ),
-                    remote_client_id: Err("no value supplied for remote_client_id".to_string()),
-                    revocation_endpoint: Ok(Default::default()),
-                    token_endpoint: Err("no value supplied for token_endpoint".to_string()),
-                    token_endpoint_content_type: Err("no value supplied for \
-                                                      token_endpoint_content_type"
-                        .to_string()),
-                }
-            }
-        }
-
-        impl OAuthProviderDeviceInfo {
-            pub fn client_id<T>(mut self, value: T) -> Self
-            where
                 T: ::std::convert::TryInto<super::TypedUuidForOAuthClientId>,
                 T::Error: ::std::fmt::Display,
             {
@@ -7780,36 +7721,6 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for client_id: {e}"));
                 self
             }
-            pub fn device_code_endpoint<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.device_code_endpoint = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for device_code_endpoint: {e}")
-                });
-                self
-            }
-            pub fn remote_client_id<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.remote_client_id = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for remote_client_id: {e}")
-                });
-                self
-            }
-            pub fn revocation_endpoint<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.revocation_endpoint = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for revocation_endpoint: {e}")
-                });
-                self
-            }
             pub fn token_endpoint<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<::std::string::String>,
@@ -7817,16 +7728,6 @@ pub mod types {
             {
                 self.token_endpoint = value.try_into().map_err(|e| {
                     format!("error converting supplied value for token_endpoint: {e}")
-                });
-                self
-            }
-            pub fn token_endpoint_content_type<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.token_endpoint_content_type = value.try_into().map_err(|e| {
-                    format!("error converting supplied value for token_endpoint_content_type: {e}")
                 });
                 self
             }
@@ -7838,12 +7739,9 @@ pub mod types {
                 value: OAuthProviderDeviceInfo,
             ) -> ::std::result::Result<Self, super::error::ConversionError> {
                 Ok(Self {
+                    auth_url_endpoint: value.auth_url_endpoint?,
                     client_id: value.client_id?,
-                    device_code_endpoint: value.device_code_endpoint?,
-                    remote_client_id: value.remote_client_id?,
-                    revocation_endpoint: value.revocation_endpoint?,
                     token_endpoint: value.token_endpoint?,
-                    token_endpoint_content_type: value.token_endpoint_content_type?,
                 })
             }
         }
@@ -7851,12 +7749,9 @@ pub mod types {
         impl ::std::convert::From<super::OAuthProviderDeviceInfo> for OAuthProviderDeviceInfo {
             fn from(value: super::OAuthProviderDeviceInfo) -> Self {
                 Self {
+                    auth_url_endpoint: Ok(value.auth_url_endpoint),
                     client_id: Ok(value.client_id),
-                    device_code_endpoint: Ok(value.device_code_endpoint),
-                    remote_client_id: Ok(value.remote_client_id),
-                    revocation_endpoint: Ok(value.revocation_endpoint),
                     token_endpoint: Ok(value.token_endpoint),
-                    token_endpoint_content_type: Ok(value.token_endpoint_content_type),
                 }
             }
         }
@@ -8350,7 +8245,8 @@ impl Client {
         builder::AuthzCodeExchange::new(self)
     }
 
-    /// Retrieve the metadata about an OAuth provider for limited input flow
+    /// Retrieve the metadata about an OAuth provider for device authorization
+    /// flow
     ///
     /// Sends a `GET` request to `/login/oauth/{provider}/device`
     ///
@@ -8364,7 +8260,27 @@ impl Client {
         builder::GetDeviceProvider::new(self)
     }
 
-    /// Exchange an OAuth device code request for an access token
+    /// Initiate a device authorization flow by proxying the request to the
+    ///
+    /// upstream OAuth provider. Creates a login attempt and returns the
+    /// upstream device authorization response.
+    ///
+    /// Sends a `POST` request to `/login/oauth/{provider}/device`
+    ///
+    /// ```ignore
+    /// let response = client.device_authz()
+    ///    .provider(provider)
+    ///    .body(body)
+    ///    .send()
+    ///    .await;
+    /// ```
+    pub fn device_authz(&self) -> builder::DeviceAuthz<'_> {
+        builder::DeviceAuthz::new(self)
+    }
+
+    /// Exchange an OAuth device code for an access token. The client polls
+    ///
+    /// this endpoint until the user completes authorization.
     ///
     /// Sends a `POST` request to `/login/oauth/{provider}/device/exchange`
     ///
@@ -10940,7 +10856,7 @@ pub mod builder {
     pub struct AuthzCodeExchange<'a> {
         client: &'a super::Client,
         provider: Result<types::OAuthProviderName, String>,
-        request_idp_token: Result<bool, String>,
+        request_idp_token: Result<Option<bool>, String>,
         body: Result<types::builder::OAuthAuthzCodeExchangeBody, String>,
     }
 
@@ -10949,7 +10865,7 @@ pub mod builder {
             Self {
                 client: client,
                 provider: Err("provider was not initialized".to_string()),
-                request_idp_token: Err("request_idp_token was not initialized".to_string()),
+                request_idp_token: Ok(None),
                 body: Ok(::std::default::Default::default()),
             }
         }
@@ -10970,6 +10886,7 @@ pub mod builder {
         {
             self.request_idp_token = value
                 .try_into()
+                .map(Some)
                 .map_err(|_| "conversion to `bool` for request_idp_token failed".to_string());
             self
         }
@@ -11135,6 +11052,104 @@ pub mod builder {
         }
     }
 
+    /// Builder for [`Client::device_authz`]
+    ///
+    /// [`Client::device_authz`]: super::Client::device_authz
+    #[derive(Debug, Clone)]
+    pub struct DeviceAuthz<'a> {
+        client: &'a super::Client,
+        provider: Result<types::OAuthProviderName, String>,
+        body: Result<types::builder::DeviceAuthorizationRequest, String>,
+    }
+
+    impl<'a> DeviceAuthz<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                provider: Err("provider was not initialized".to_string()),
+                body: Ok(::std::default::Default::default()),
+            }
+        }
+
+        pub fn provider<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::OAuthProviderName>,
+        {
+            self.provider = value
+                .try_into()
+                .map_err(|_| "conversion to `OAuthProviderName` for provider failed".to_string());
+            self
+        }
+
+        pub fn body<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::DeviceAuthorizationRequest>,
+            <V as std::convert::TryInto<types::DeviceAuthorizationRequest>>::Error:
+                std::fmt::Display,
+        {
+            self.body = value.try_into().map(From::from).map_err(|s| {
+                format!(
+                    "conversion to `DeviceAuthorizationRequest` for body failed: {}",
+                    s
+                )
+            });
+            self
+        }
+
+        pub fn body_map<F>(mut self, f: F) -> Self
+        where
+            F: std::ops::FnOnce(
+                    types::builder::DeviceAuthorizationRequest,
+                ) -> types::builder::DeviceAuthorizationRequest,
+        {
+            self.body = self.body.map(f);
+            self
+        }
+
+        /// Sends a `POST` request to `/login/oauth/{provider}/device`
+        pub async fn send(self) -> Result<ResponseValue<ByteStream>, Error<ByteStream>> {
+            let Self {
+                client,
+                provider,
+                body,
+            } = self;
+            let provider = provider.map_err(Error::InvalidRequest)?;
+            let body = body
+                .and_then(|v| {
+                    types::DeviceAuthorizationRequest::try_from(v).map_err(|e| e.to_string())
+                })
+                .map_err(Error::InvalidRequest)?;
+            let url = format!(
+                "{}/login/oauth/{}/device",
+                client.baseurl,
+                encode_path(&provider.to_string()),
+            );
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(1usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .post(url)
+                .json(&body)
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "device_authz",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200..=299 => Ok(ResponseValue::stream(response)),
+                _ => Err(Error::ErrorResponse(ResponseValue::stream(response))),
+            }
+        }
+    }
+
     /// Builder for [`Client::exchange_device_token`]
     ///
     /// [`Client::exchange_device_token`]: super::Client::exchange_device_token
@@ -11142,7 +11157,7 @@ pub mod builder {
     pub struct ExchangeDeviceToken<'a> {
         client: &'a super::Client,
         provider: Result<types::OAuthProviderName, String>,
-        body: Result<types::builder::AccessTokenExchangeRequest, String>,
+        body: Result<types::builder::DeviceTokenExchangeRequest, String>,
     }
 
     impl<'a> ExchangeDeviceToken<'a> {
@@ -11166,13 +11181,13 @@ pub mod builder {
 
         pub fn body<V>(mut self, value: V) -> Self
         where
-            V: std::convert::TryInto<types::AccessTokenExchangeRequest>,
-            <V as std::convert::TryInto<types::AccessTokenExchangeRequest>>::Error:
+            V: std::convert::TryInto<types::DeviceTokenExchangeRequest>,
+            <V as std::convert::TryInto<types::DeviceTokenExchangeRequest>>::Error:
                 std::fmt::Display,
         {
             self.body = value.try_into().map(From::from).map_err(|s| {
                 format!(
-                    "conversion to `AccessTokenExchangeRequest` for body failed: {}",
+                    "conversion to `DeviceTokenExchangeRequest` for body failed: {}",
                     s
                 )
             });
@@ -11182,8 +11197,8 @@ pub mod builder {
         pub fn body_map<F>(mut self, f: F) -> Self
         where
             F: std::ops::FnOnce(
-                    types::builder::AccessTokenExchangeRequest,
-                ) -> types::builder::AccessTokenExchangeRequest,
+                    types::builder::DeviceTokenExchangeRequest,
+                ) -> types::builder::DeviceTokenExchangeRequest,
         {
             self.body = self.body.map(f);
             self
@@ -11199,7 +11214,7 @@ pub mod builder {
             let provider = provider.map_err(Error::InvalidRequest)?;
             let body = body
                 .and_then(|v| {
-                    types::AccessTokenExchangeRequest::try_from(v).map_err(|e| e.to_string())
+                    types::DeviceTokenExchangeRequest::try_from(v).map_err(|e| e.to_string())
                 })
                 .map_err(Error::InvalidRequest)?;
             let url = format!(

@@ -50,9 +50,9 @@ tracing-appender = "0.2.4"
 tracing-slog = { git = "https://github.com/oxidecomputer/tracing-slog", default-features = false }
 tracing-subscriber = { version = "0.3.22", features = ["env-filter", "json"] }
 uuid = { version = "1", features = ["serde"] }
-v-api = { path = "../v-api/v-api", default-features = false }
-v-api-installer = { path = "../v-api/v-api-installer", default-features = false }
-v-api-param = { path = "../v-api/v-api-param", default-features = false }
-v-api-permission-derive = { path = "../v-api/v-api-permission-derive", default-features = false }
-v-cli-sdk = { path = "../v-api/v-cli-sdk", default-features = false }
-v-model = { path = "../v-api/v-model", default-features = false }
+v-api = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
+v-api-installer = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
+v-api-param = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
+v-api-permission-derive = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
+v-cli-sdk = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
+v-model = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }

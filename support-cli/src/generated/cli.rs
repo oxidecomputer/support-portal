@@ -42,6 +42,7 @@ impl<T: CliConfig> Cli<T> {
             CliCommand::AuthzCodeCallback => Self::cli_authz_code_callback(),
             CliCommand::AuthzCodeExchange => Self::cli_authz_code_exchange(),
             CliCommand::GetDeviceProvider => Self::cli_get_device_provider(),
+            CliCommand::DeviceAuthz => Self::cli_device_authz(),
             CliCommand::ExchangeDeviceToken => Self::cli_exchange_device_token(),
             CliCommand::GetWebPkceProvider => Self::cli_get_web_pkce_provider(),
             CliCommand::ListMagicLinks => Self::cli_list_magic_links(),
@@ -706,7 +707,7 @@ impl<T: CliConfig> Cli<T> {
                 ::clap::Arg::new("request-idp-token")
                     .long("request-idp-token")
                     .value_parser(::clap::value_parser!(bool))
-                    .required(true),
+                    .required(false),
             )
             .arg(
                 ::clap::Arg::new("json-body")
@@ -740,11 +741,65 @@ impl<T: CliConfig> Cli<T> {
                     ))
                     .required(true),
             )
-            .about("Retrieve the metadata about an OAuth provider for limited input flow")
+            .about("Retrieve the metadata about an OAuth provider for device authorization flow")
+    }
+
+    pub fn cli_device_authz() -> ::clap::Command {
+        ::clap::Command::new("")
+            .arg(
+                ::clap::Arg::new("client-id")
+                    .long("client-id")
+                    .value_parser(::clap::value_parser!(types::TypedUuidForOAuthClientId))
+                    .required_unless_present("json-body"),
+            )
+            .arg(
+                ::clap::Arg::new("provider")
+                    .long("provider")
+                    .value_parser(::clap::builder::TypedValueParser::map(
+                        ::clap::builder::PossibleValuesParser::new([
+                            types::OAuthProviderName::Github.to_string(),
+                            types::OAuthProviderName::Google.to_string(),
+                            types::OAuthProviderName::Zendesk.to_string(),
+                        ]),
+                        |s| types::OAuthProviderName::try_from(s).unwrap(),
+                    ))
+                    .required(true),
+            )
+            .arg(
+                ::clap::Arg::new("scope")
+                    .long("scope")
+                    .value_parser(::clap::value_parser!(::std::string::String))
+                    .required(false),
+            )
+            .arg(
+                ::clap::Arg::new("json-body")
+                    .long("json-body")
+                    .value_name("JSON-FILE")
+                    .required(false)
+                    .value_parser(::clap::value_parser!(std::path::PathBuf))
+                    .help("Path to a file that contains the full json body."),
+            )
+            .arg(
+                ::clap::Arg::new("json-body-template")
+                    .long("json-body-template")
+                    .action(::clap::ArgAction::SetTrue)
+                    .help("XXX"),
+            )
+            .about("Initiate a device authorization flow by proxying the request to the")
+            .long_about(
+                "upstream OAuth provider. Creates a login attempt and returns the upstream device \
+                 authorization response.",
+            )
     }
 
     pub fn cli_exchange_device_token() -> ::clap::Command {
         ::clap::Command::new("")
+            .arg(
+                ::clap::Arg::new("client-id")
+                    .long("client-id")
+                    .value_parser(::clap::value_parser!(types::TypedUuidForOAuthClientId))
+                    .required_unless_present("json-body"),
+            )
             .arg(
                 ::clap::Arg::new("device-code")
                     .long("device-code")
@@ -752,18 +807,16 @@ impl<T: CliConfig> Cli<T> {
                     .required_unless_present("json-body"),
             )
             .arg(
-                ::clap::Arg::new("expires-at")
-                    .long("expires-at")
-                    .value_parser(::clap::value_parser!(
-                        ::chrono::DateTime<::chrono::offset::Utc>
-                    ))
-                    .required(false),
-            )
-            .arg(
                 ::clap::Arg::new("grant-type")
                     .long("grant-type")
                     .value_parser(::clap::value_parser!(::std::string::String))
                     .required_unless_present("json-body"),
+            )
+            .arg(
+                ::clap::Arg::new("pkce-verifier")
+                    .long("pkce-verifier")
+                    .value_parser(::clap::value_parser!(::std::string::String))
+                    .required(false),
             )
             .arg(
                 ::clap::Arg::new("provider")
@@ -792,7 +845,8 @@ impl<T: CliConfig> Cli<T> {
                     .action(::clap::ArgAction::SetTrue)
                     .help("XXX"),
             )
-            .about("Exchange an OAuth device code request for an access token")
+            .about("Exchange an OAuth device code for an access token. The client polls")
+            .long_about("this endpoint until the user completes authorization.")
     }
 
     pub fn cli_get_web_pkce_provider() -> ::clap::Command {
@@ -1102,6 +1156,7 @@ impl<T: CliConfig> Cli<T> {
             CliCommand::AuthzCodeCallback => self.execute_authz_code_callback(matches).await,
             CliCommand::AuthzCodeExchange => self.execute_authz_code_exchange(matches).await,
             CliCommand::GetDeviceProvider => self.execute_get_device_provider(matches).await,
+            CliCommand::DeviceAuthz => self.execute_device_authz(matches).await,
             CliCommand::ExchangeDeviceToken => self.execute_exchange_device_token(matches).await,
             CliCommand::GetWebPkceProvider => self.execute_get_web_pkce_provider(matches).await,
             CliCommand::ListMagicLinks => self.execute_list_magic_links(matches).await,
@@ -1437,7 +1492,7 @@ impl<T: CliConfig> Cli<T> {
         if let Some(value) =
             matches.get_one::<::chrono::DateTime<::chrono::offset::Utc>>("expires-at")
         {
-            request = request.body_map(|body| body.expires_at(*value))
+            request = request.body_map(|body| body.expires_at(value.clone()))
         }
 
         if let Some(value) = matches.get_one::<types::TypedUuidForUserId>("user-id") {
@@ -1737,11 +1792,11 @@ impl<T: CliConfig> Cli<T> {
         }
 
         if let Some(value) = matches.get_one::<i64>("expires-in") {
-            request = request.body_map(|body| body.expires_in(*value))
+            request = request.body_map(|body| body.expires_in(value.clone()))
         }
 
         if let Some(value) = matches.get_one::<types::MagicLinkMedium>("medium") {
-            request = request.body_map(|body| body.medium(*value))
+            request = request.body_map(|body| body.medium(value.clone()))
         }
 
         if let Some(value) = matches.get_one::<::std::string::String>("recipient") {
@@ -1800,7 +1855,7 @@ impl<T: CliConfig> Cli<T> {
         }
 
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
-            request = request.provider(*value);
+            request = request.provider(value.clone());
         }
 
         if let Some(value) = matches.get_one::<::std::string::String>("redirect-uri") {
@@ -1847,7 +1902,7 @@ impl<T: CliConfig> Cli<T> {
         }
 
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
-            request = request.provider(*value);
+            request = request.provider(value.clone());
         }
 
         if let Some(value) = matches.get_one::<::std::string::String>("state") {
@@ -1894,7 +1949,7 @@ impl<T: CliConfig> Cli<T> {
         }
 
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
-            request = request.provider(*value);
+            request = request.provider(value.clone());
         }
 
         if let Some(value) = matches.get_one::<::std::string::String>("redirect-uri") {
@@ -1902,7 +1957,7 @@ impl<T: CliConfig> Cli<T> {
         }
 
         if let Some(value) = matches.get_one::<bool>("request-idp-token") {
-            request = request.request_idp_token(*value);
+            request = request.request_idp_token(value.clone());
         }
 
         if let Some(value) = matches.get_one::<std::path::PathBuf>("json-body") {
@@ -1934,7 +1989,7 @@ impl<T: CliConfig> Cli<T> {
     ) -> anyhow::Result<()> {
         let mut request = self.client.get_device_provider();
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
-            request = request.provider(*value);
+            request = request.provider(value.clone());
         }
 
         self.config
@@ -1952,33 +2007,69 @@ impl<T: CliConfig> Cli<T> {
         }
     }
 
+    pub async fn execute_device_authz(&self, matches: &::clap::ArgMatches) -> anyhow::Result<()> {
+        let mut request = self.client.device_authz();
+        if let Some(value) = matches.get_one::<types::TypedUuidForOAuthClientId>("client-id") {
+            request = request.body_map(|body| body.client_id(value.clone()))
+        }
+
+        if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
+            request = request.provider(value.clone());
+        }
+
+        if let Some(value) = matches.get_one::<::std::string::String>("scope") {
+            request = request.body_map(|body| body.scope(value.clone()))
+        }
+
+        if let Some(value) = matches.get_one::<std::path::PathBuf>("json-body") {
+            let body_txt = std::fs::read_to_string(value)
+                .with_context(|| format!("failed to read {}", value.display()))?;
+            let body_value = serde_json::from_str::<types::DeviceAuthorizationRequest>(&body_txt)
+                .with_context(|| format!("failed to parse {}", value.display()))?;
+            request = request.body(body_value);
+        }
+
+        self.config.execute_device_authz(matches, &mut request)?;
+        let result = request.send().await;
+        match result {
+            Ok(r) => {
+                todo!()
+            }
+            Err(r) => {
+                todo!()
+            }
+        }
+    }
+
     pub async fn execute_exchange_device_token(
         &self,
         matches: &::clap::ArgMatches,
     ) -> anyhow::Result<()> {
         let mut request = self.client.exchange_device_token();
-        if let Some(value) = matches.get_one::<::std::string::String>("device-code") {
-            request = request.body_map(|body| body.device_code(value.clone()))
+        if let Some(value) = matches.get_one::<types::TypedUuidForOAuthClientId>("client-id") {
+            request = request.body_map(|body| body.client_id(value.clone()))
         }
 
-        if let Some(value) =
-            matches.get_one::<::chrono::DateTime<::chrono::offset::Utc>>("expires-at")
-        {
-            request = request.body_map(|body| body.expires_at(*value))
+        if let Some(value) = matches.get_one::<::std::string::String>("device-code") {
+            request = request.body_map(|body| body.device_code(value.clone()))
         }
 
         if let Some(value) = matches.get_one::<::std::string::String>("grant-type") {
             request = request.body_map(|body| body.grant_type(value.clone()))
         }
 
+        if let Some(value) = matches.get_one::<::std::string::String>("pkce-verifier") {
+            request = request.body_map(|body| body.pkce_verifier(value.clone()))
+        }
+
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
-            request = request.provider(*value);
+            request = request.provider(value.clone());
         }
 
         if let Some(value) = matches.get_one::<std::path::PathBuf>("json-body") {
             let body_txt = std::fs::read_to_string(value)
                 .with_context(|| format!("failed to read {}", value.display()))?;
-            let body_value = serde_json::from_str::<types::AccessTokenExchangeRequest>(&body_txt)
+            let body_value = serde_json::from_str::<types::DeviceTokenExchangeRequest>(&body_txt)
                 .with_context(|| format!("failed to parse {}", value.display()))?;
             request = request.body(body_value);
         }
@@ -2002,7 +2093,7 @@ impl<T: CliConfig> Cli<T> {
     ) -> anyhow::Result<()> {
         let mut request = self.client.get_web_pkce_provider();
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
-            request = request.provider(*value);
+            request = request.provider(value.clone());
         }
 
         self.config
@@ -2201,7 +2292,7 @@ impl<T: CliConfig> Cli<T> {
     pub async fn execute_get_mappers(&self, matches: &::clap::ArgMatches) -> anyhow::Result<()> {
         let mut request = self.client.get_mappers();
         if let Some(value) = matches.get_one::<bool>("include-depleted") {
-            request = request.include_depleted(*value);
+            request = request.include_depleted(value.clone());
         }
 
         self.config.execute_get_mappers(matches, &mut request)?;
@@ -2221,7 +2312,7 @@ impl<T: CliConfig> Cli<T> {
     pub async fn execute_create_mapper(&self, matches: &::clap::ArgMatches) -> anyhow::Result<()> {
         let mut request = self.client.create_mapper();
         if let Some(value) = matches.get_one::<i32>("max-activations") {
-            request = request.body_map(|body| body.max_activations(*value))
+            request = request.body_map(|body| body.max_activations(value.clone()))
         }
 
         if let Some(value) = matches.get_one::<::std::string::String>("name") {
@@ -2697,6 +2788,14 @@ pub trait CliConfig {
         Ok(())
     }
 
+    fn execute_device_authz(
+        &self,
+        matches: &::clap::ArgMatches,
+        request: &mut builder::DeviceAuthz,
+    ) -> anyhow::Result<()> {
+        Ok(())
+    }
+
     fn execute_exchange_device_token(
         &self,
         matches: &::clap::ArgMatches,
@@ -2886,6 +2985,7 @@ pub enum CliCommand {
     AuthzCodeCallback,
     AuthzCodeExchange,
     GetDeviceProvider,
+    DeviceAuthz,
     ExchangeDeviceToken,
     GetWebPkceProvider,
     ListMagicLinks,
@@ -2937,6 +3037,7 @@ impl CliCommand {
             CliCommand::AuthzCodeCallback,
             CliCommand::AuthzCodeExchange,
             CliCommand::GetDeviceProvider,
+            CliCommand::DeviceAuthz,
             CliCommand::ExchangeDeviceToken,
             CliCommand::GetWebPkceProvider,
             CliCommand::ListMagicLinks,
@@ -2989,6 +3090,7 @@ impl CliCommand {
             CliCommand::AuthzCodeCallback => "authz_code_callback",
             CliCommand::AuthzCodeExchange => "authz_code_exchange",
             CliCommand::GetDeviceProvider => "get_device_provider",
+            CliCommand::DeviceAuthz => "device_authz",
             CliCommand::ExchangeDeviceToken => "exchange_device_token",
             CliCommand::GetWebPkceProvider => "get_web_pkce_provider",
             CliCommand::ListMagicLinks => "list_magic_links",

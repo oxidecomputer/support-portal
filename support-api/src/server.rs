@@ -11,12 +11,11 @@ use crate::{context::ApiContext, permissions::ApiPermissions};
 pub fn create_server(ctx: ApiContext, logger: Logger, port: u16) -> ServerBuilder<ApiContext> {
     let description = describe();
 
-    
     dropshot::ServerBuilder::new(description, ctx, logger).config(dropshot::ConfigDropshot {
-            default_request_body_max_bytes: 10 * 1024 * 1024,
-            bind_address: SocketAddr::from(([0, 0, 0, 0], port)),
-            ..Default::default()
-        })
+        default_request_body_max_bytes: 10 * 1024 * 1024,
+        bind_address: SocketAddr::from(([0, 0, 0, 0], port)),
+        ..Default::default()
+    })
 }
 
 v_api::v_system_endpoints!(ApiContext, ApiPermissions);

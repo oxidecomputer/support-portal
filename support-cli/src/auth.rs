@@ -88,17 +88,33 @@ impl CliOAuthAdapter for OAuthAdapter {
                 VLoginProvider::Zendesk => OAuthProviderName::Zendesk,
                 _ => return Err(ContextError::UnsupportedOAuthProvider),
             };
-            let info = client
+
+            // Try PKCE flow first, fall back to device flow
+            if let Ok(resp) = client
                 .get_web_pkce_provider()
                 .provider(provider_name)
                 .send()
                 .await
-                .unwrap()
-                .into_inner();
-            Ok(OAuthProvider {
-                provider,
-                info: OAuthProviderInfo::Pkce(info),
-            })
+            {
+                return Ok(OAuthProvider {
+                    provider,
+                    info: OAuthProviderInfo::Pkce(resp.into_inner()),
+                });
+            }
+
+            if let Ok(resp) = client
+                .get_device_provider()
+                .provider(provider_name)
+                .send()
+                .await
+            {
+                return Ok(OAuthProvider {
+                    provider,
+                    info: OAuthProviderInfo::Device(resp.into_inner()),
+                });
+            }
+
+            Err(ContextError::UnsupportedOAuthProvider)
         })
     }
     fn exchange_authorization_code(
@@ -202,10 +218,10 @@ impl CliOAuthProviderInfo for OAuthProvider {
     fn provider(&self) -> VLoginProvider {
         self.provider
     }
-    fn remote_client_id(&self) -> &str {
+    fn client_id(&self) -> Uuid {
         match &self.info {
-            OAuthProviderInfo::Device(inner) => &inner.remote_client_id,
-            OAuthProviderInfo::Pkce(inner) => &inner.web.remote.client_id,
+            OAuthProviderInfo::Device(inner) => inner.client_id.0,
+            OAuthProviderInfo::Pkce(inner) => inner.client_id.0,
         }
     }
     fn public_pkce_port(&self) -> Option<u16> {
@@ -220,15 +236,9 @@ impl CliOAuthProviderInfo for OAuthProvider {
             OAuthProviderInfo::Pkce(_) => true,
         }
     }
-    fn device_code_endpoint(&self) -> Option<&str> {
-        match &self.info {
-            OAuthProviderInfo::Device(inner) => Some(&inner.device_code_endpoint),
-            OAuthProviderInfo::Pkce(_) => None,
-        }
-    }
     fn auth_url_endpoint(&self) -> Option<&str> {
         match &self.info {
-            OAuthProviderInfo::Device(inner) => None,
+            OAuthProviderInfo::Device(_) => None,
             OAuthProviderInfo::Pkce(inner) => Some(&inner.web.auth_url_endpoint),
         }
     }
@@ -240,21 +250,23 @@ impl CliOAuthProviderInfo for OAuthProvider {
     }
     fn redirect_endpoint(&self) -> Option<&str> {
         match &self.info {
-            OAuthProviderInfo::Device(inner) => None,
+            OAuthProviderInfo::Device(_) => None,
             OAuthProviderInfo::Pkce(inner) => Some(&inner.redirect_endpoint),
-        }
-    }
-    fn client_id(&self) -> Uuid {
-        match &self.info {
-            OAuthProviderInfo::Device(inner) => inner.client_id.0,
-            OAuthProviderInfo::Pkce(inner) => inner.client_id.0,
         }
     }
     fn scopes(&self) -> &[String] {
         &[]
-        // match self {
-        //     Self::Device(inner) => &inner.scopes,
-        //     Self::Pkce(inner) => &inner.scopes,
-        // }
+    }
+    fn device_authorization_endpoint(&self) -> Option<&str> {
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => Some(&inner.auth_url_endpoint),
+            OAuthProviderInfo::Pkce(_) => None,
+        }
+    }
+    fn device_token_endpoint(&self) -> Option<&str> {
+        match &self.info {
+            OAuthProviderInfo::Device(inner) => Some(&inner.token_endpoint),
+            OAuthProviderInfo::Pkce(_) => None,
+        }
     }
 }

@@ -104,9 +104,10 @@ fn cmd_path<'a>(cmd: &CliCommand) -> Option<&'a str> {
         CliCommand::DeleteMagicLinkSecret => Some("sys mlink secret delete"),
 
         // Authentication is handled separately
+        CliCommand::DeviceAuthz => None,
         CliCommand::ExchangeDeviceToken => None,
-        CliCommand::GetWebPkceProvider => None,
         CliCommand::GetDeviceProvider => None,
+        CliCommand::GetWebPkceProvider => None,
         CliCommand::MagicLinkSend => None,
         CliCommand::MagicLinkExchange => None,
 
