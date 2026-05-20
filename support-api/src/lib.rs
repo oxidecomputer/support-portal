@@ -66,6 +66,7 @@ pub async fn run_server(
         .with_additional_builtin_permissions(vec![
             ApiPermissions::CreateOAuthClient,
             ApiPermissions::ManageOAuthClientsAll,
+            ApiPermissions::RetrieveRemoteAccessToken,
         ])
         .build()
         .await?;
