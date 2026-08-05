@@ -11,6 +11,7 @@ use std::{
     process,
     sync::{Arc, Mutex},
 };
+use strum::IntoEnumIterator;
 use thiserror::Error;
 use tokio::select;
 use v_api::{
@@ -65,12 +66,9 @@ pub async fn run_server(
         .with_jwt_expiration(config.jwt.default_expiration)
         .with_storage_url(database_url_secret.expose_secret().to_string())
         .with_keys(config.jwt.keys)
-        .with_additional_builtin_permissions(vec![
-            ApiPermissions::CreateOAuthClient,
-            ApiPermissions::ManageOAuthClientsAll,
-            ApiPermissions::RetrieveRemoteAccessToken,
-        ])
+        .with_additional_builtin_permissions(ApiPermissions::iter().collect())
         .with_saga_backend(node_id, Some(logger.clone()))
+        .with_mappers(config.presets.map(|p| p.mappers).unwrap_or_default())
         .build()
         .await?;
 
