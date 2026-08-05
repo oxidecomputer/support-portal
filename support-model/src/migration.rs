@@ -8,6 +8,6 @@ pub async fn run_migrations(url: &str) -> Result<(), anyhow::Error> {
 }
 
 pub async fn run_migrations_on_conn(url: &str) -> Result<(), anyhow::Error> {
-    v_api_installer::run_migrations(url);
+    v_model::migrations::run_migrations(url);
     Ok(())
 }

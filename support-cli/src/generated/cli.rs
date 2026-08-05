@@ -26,6 +26,8 @@ impl<T: CliConfig> Cli<T> {
             CliCommand::AddApiUserToGroup => Self::cli_add_api_user_to_group(),
             CliCommand::RemoveApiUserFromGroup => Self::cli_remove_api_user_from_group(),
             CliCommand::LinkProvider => Self::cli_link_provider(),
+            CliCommand::AddApiUserPermission => Self::cli_add_api_user_permission(),
+            CliCommand::RemoveApiUserPermission => Self::cli_remove_api_user_permission(),
             CliCommand::ListApiUserTokens => Self::cli_list_api_user_tokens(),
             CliCommand::CreateApiUserToken => Self::cli_create_api_user_token(),
             CliCommand::GetApiUserToken => Self::cli_get_api_user_token(),
@@ -134,7 +136,8 @@ impl<T: CliConfig> Cli<T> {
                     .action(::clap::ArgAction::SetTrue)
                     .help("XXX"),
             )
-            .about("Update the permissions assigned to a given user")
+            .about("Update the permissions assigned to a given user. These replace any existing")
+            .long_about("permissions.")
     }
 
     pub fn cli_set_api_user_contact_email() -> ::clap::Command {
@@ -245,6 +248,56 @@ impl<T: CliConfig> Cli<T> {
                     .help("XXX"),
             )
             .about("Link an existing login provider to this user")
+    }
+
+    pub fn cli_add_api_user_permission() -> ::clap::Command {
+        ::clap::Command::new("")
+            .arg(
+                ::clap::Arg::new("user-id")
+                    .long("user-id")
+                    .value_parser(::clap::value_parser!(types::TypedUuidForUserId))
+                    .required(true),
+            )
+            .arg(
+                ::clap::Arg::new("json-body")
+                    .long("json-body")
+                    .value_name("JSON-FILE")
+                    .required(true)
+                    .value_parser(::clap::value_parser!(std::path::PathBuf))
+                    .help("Path to a file that contains the full json body."),
+            )
+            .arg(
+                ::clap::Arg::new("json-body-template")
+                    .long("json-body-template")
+                    .action(::clap::ArgAction::SetTrue)
+                    .help("XXX"),
+            )
+            .about("Add a single permission to a user")
+    }
+
+    pub fn cli_remove_api_user_permission() -> ::clap::Command {
+        ::clap::Command::new("")
+            .arg(
+                ::clap::Arg::new("user-id")
+                    .long("user-id")
+                    .value_parser(::clap::value_parser!(types::TypedUuidForUserId))
+                    .required(true),
+            )
+            .arg(
+                ::clap::Arg::new("json-body")
+                    .long("json-body")
+                    .value_name("JSON-FILE")
+                    .required(true)
+                    .value_parser(::clap::value_parser!(std::path::PathBuf))
+                    .help("Path to a file that contains the full json body."),
+            )
+            .arg(
+                ::clap::Arg::new("json-body-template")
+                    .long("json-body-template")
+                    .action(::clap::ArgAction::SetTrue)
+                    .help("XXX"),
+            )
+            .about("Remove a single permission from a user")
     }
 
     pub fn cli_list_api_user_tokens() -> ::clap::Command {
@@ -461,7 +514,7 @@ impl<T: CliConfig> Cli<T> {
             .arg(
                 ::clap::Arg::new("secret")
                     .long("secret")
-                    .value_parser(::clap::value_parser!(::std::string::String))
+                    .value_parser(::clap::value_parser!(types::SecretString))
                     .required_unless_present("json-body"),
             )
             .arg(
@@ -527,7 +580,7 @@ impl<T: CliConfig> Cli<T> {
             .arg(
                 ::clap::Arg::new("secret")
                     .long("secret")
-                    .value_parser(::clap::value_parser!(::std::string::String))
+                    .value_parser(::clap::value_parser!(types::SecretString))
                     .required_unless_present("json-body"),
             )
             .arg(
@@ -669,20 +722,20 @@ impl<T: CliConfig> Cli<T> {
                     .required_unless_present("json-body"),
             )
             .arg(
-                ::clap::Arg::new("grant-type")
-                    .long("grant-type")
-                    .value_parser(::clap::value_parser!(::std::string::String))
-                    .required_unless_present("json-body"),
-            )
-            .arg(
-                ::clap::Arg::new("pkce-verifier")
-                    .long("pkce-verifier")
+                ::clap::Arg::new("code-verifier")
+                    .long("code-verifier")
                     .value_parser(::clap::value_parser!(::std::string::String))
                     .required_unless_present("json-body")
                     .help(
                         "PKCE code verifier (RFC 7636). Required for all authorization code \
                          exchanges.",
                     ),
+            )
+            .arg(
+                ::clap::Arg::new("grant-type")
+                    .long("grant-type")
+                    .value_parser(::clap::value_parser!(::std::string::String))
+                    .required_unless_present("json-body"),
             )
             .arg(
                 ::clap::Arg::new("provider")
@@ -811,12 +864,6 @@ impl<T: CliConfig> Cli<T> {
                     .long("grant-type")
                     .value_parser(::clap::value_parser!(::std::string::String))
                     .required_unless_present("json-body"),
-            )
-            .arg(
-                ::clap::Arg::new("pkce-verifier")
-                    .long("pkce-verifier")
-                    .value_parser(::clap::value_parser!(::std::string::String))
-                    .required(false),
             )
             .arg(
                 ::clap::Arg::new("provider")
@@ -1140,6 +1187,10 @@ impl<T: CliConfig> Cli<T> {
                 self.execute_remove_api_user_from_group(matches).await
             }
             CliCommand::LinkProvider => self.execute_link_provider(matches).await,
+            CliCommand::AddApiUserPermission => self.execute_add_api_user_permission(matches).await,
+            CliCommand::RemoveApiUserPermission => {
+                self.execute_remove_api_user_permission(matches).await
+            }
             CliCommand::ListApiUserTokens => self.execute_list_api_user_tokens(matches).await,
             CliCommand::CreateApiUserToken => self.execute_create_api_user_token(matches).await,
             CliCommand::GetApiUserToken => self.execute_get_api_user_token(matches).await,
@@ -1460,6 +1511,72 @@ impl<T: CliConfig> Cli<T> {
         }
     }
 
+    pub async fn execute_add_api_user_permission(
+        &self,
+        matches: &::clap::ArgMatches,
+    ) -> anyhow::Result<()> {
+        let mut request = self.client.add_api_user_permission();
+        if let Some(value) = matches.get_one::<types::TypedUuidForUserId>("user-id") {
+            request = request.user_id(value.clone());
+        }
+
+        if let Some(value) = matches.get_one::<std::path::PathBuf>("json-body") {
+            let body_txt = std::fs::read_to_string(value)
+                .with_context(|| format!("failed to read {}", value.display()))?;
+            let body_value =
+                serde_json::from_str::<types::ApiUserPermissionParamsForApiPermissions>(&body_txt)
+                    .with_context(|| format!("failed to parse {}", value.display()))?;
+            request = request.body(body_value);
+        }
+
+        self.config
+            .execute_add_api_user_permission(matches, &mut request)?;
+        let result = request.send().await;
+        match result {
+            Ok(r) => {
+                self.config.success_item(&r);
+                Ok(())
+            }
+            Err(r) => {
+                self.config.error(&r);
+                Err(anyhow::Error::new(r))
+            }
+        }
+    }
+
+    pub async fn execute_remove_api_user_permission(
+        &self,
+        matches: &::clap::ArgMatches,
+    ) -> anyhow::Result<()> {
+        let mut request = self.client.remove_api_user_permission();
+        if let Some(value) = matches.get_one::<types::TypedUuidForUserId>("user-id") {
+            request = request.user_id(value.clone());
+        }
+
+        if let Some(value) = matches.get_one::<std::path::PathBuf>("json-body") {
+            let body_txt = std::fs::read_to_string(value)
+                .with_context(|| format!("failed to read {}", value.display()))?;
+            let body_value =
+                serde_json::from_str::<types::ApiUserPermissionParamsForApiPermissions>(&body_txt)
+                    .with_context(|| format!("failed to parse {}", value.display()))?;
+            request = request.body(body_value);
+        }
+
+        self.config
+            .execute_remove_api_user_permission(matches, &mut request)?;
+        let result = request.send().await;
+        match result {
+            Ok(r) => {
+                self.config.success_item(&r);
+                Ok(())
+            }
+            Err(r) => {
+                self.config.error(&r);
+                Err(anyhow::Error::new(r))
+            }
+        }
+    }
+
     pub async fn execute_list_api_user_tokens(
         &self,
         matches: &::clap::ArgMatches,
@@ -1755,7 +1872,7 @@ impl<T: CliConfig> Cli<T> {
             request = request.body_map(|body| body.recipient(value.clone()))
         }
 
-        if let Some(value) = matches.get_one::<::std::string::String>("secret") {
+        if let Some(value) = matches.get_one::<types::SecretString>("secret") {
             request = request.body_map(|body| body.secret(value.clone()))
         }
 
@@ -1811,7 +1928,7 @@ impl<T: CliConfig> Cli<T> {
             request = request.body_map(|body| body.scope(value.clone()))
         }
 
-        if let Some(value) = matches.get_one::<::std::string::String>("secret") {
+        if let Some(value) = matches.get_one::<types::SecretString>("secret") {
             request = request.body_map(|body| body.secret(value.clone()))
         }
 
@@ -1940,12 +2057,12 @@ impl<T: CliConfig> Cli<T> {
             request = request.body_map(|body| body.code(value.clone()))
         }
 
-        if let Some(value) = matches.get_one::<::std::string::String>("grant-type") {
-            request = request.body_map(|body| body.grant_type(value.clone()))
+        if let Some(value) = matches.get_one::<::std::string::String>("code-verifier") {
+            request = request.body_map(|body| body.code_verifier(value.clone()))
         }
 
-        if let Some(value) = matches.get_one::<::std::string::String>("pkce-verifier") {
-            request = request.body_map(|body| body.pkce_verifier(value.clone()))
+        if let Some(value) = matches.get_one::<::std::string::String>("grant-type") {
+            request = request.body_map(|body| body.grant_type(value.clone()))
         }
 
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
@@ -2056,10 +2173,6 @@ impl<T: CliConfig> Cli<T> {
 
         if let Some(value) = matches.get_one::<::std::string::String>("grant-type") {
             request = request.body_map(|body| body.grant_type(value.clone()))
-        }
-
-        if let Some(value) = matches.get_one::<::std::string::String>("pkce-verifier") {
-            request = request.body_map(|body| body.pkce_verifier(value.clone()))
         }
 
         if let Some(value) = matches.get_one::<types::OAuthProviderName>("provider") {
@@ -2660,6 +2773,22 @@ pub trait CliConfig {
         Ok(())
     }
 
+    fn execute_add_api_user_permission(
+        &self,
+        matches: &::clap::ArgMatches,
+        request: &mut builder::AddApiUserPermission,
+    ) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    fn execute_remove_api_user_permission(
+        &self,
+        matches: &::clap::ArgMatches,
+        request: &mut builder::RemoveApiUserPermission,
+    ) -> anyhow::Result<()> {
+        Ok(())
+    }
+
     fn execute_list_api_user_tokens(
         &self,
         matches: &::clap::ArgMatches,
@@ -2969,6 +3098,8 @@ pub enum CliCommand {
     AddApiUserToGroup,
     RemoveApiUserFromGroup,
     LinkProvider,
+    AddApiUserPermission,
+    RemoveApiUserPermission,
     ListApiUserTokens,
     CreateApiUserToken,
     GetApiUserToken,
@@ -3021,6 +3152,8 @@ impl CliCommand {
             CliCommand::AddApiUserToGroup,
             CliCommand::RemoveApiUserFromGroup,
             CliCommand::LinkProvider,
+            CliCommand::AddApiUserPermission,
+            CliCommand::RemoveApiUserPermission,
             CliCommand::ListApiUserTokens,
             CliCommand::CreateApiUserToken,
             CliCommand::GetApiUserToken,
@@ -3074,6 +3207,8 @@ impl CliCommand {
             CliCommand::AddApiUserToGroup => "add_api_user_to_group",
             CliCommand::RemoveApiUserFromGroup => "remove_api_user_from_group",
             CliCommand::LinkProvider => "link_provider",
+            CliCommand::AddApiUserPermission => "add_api_user_permission",
+            CliCommand::RemoveApiUserPermission => "remove_api_user_permission",
             CliCommand::ListApiUserTokens => "list_api_user_tokens",
             CliCommand::CreateApiUserToken => "create_api_user_token",
             CliCommand::GetApiUserToken => "get_api_user_token",

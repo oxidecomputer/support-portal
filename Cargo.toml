@@ -50,9 +50,15 @@ tracing-appender = "0.2.4"
 tracing-slog = { git = "https://github.com/oxidecomputer/tracing-slog", default-features = false }
 tracing-subscriber = { version = "0.3.22", features = ["env-filter", "json"] }
 uuid = { version = "1", features = ["serde"] }
-v-api = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
-v-api-installer = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
-v-api-param = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
-v-api-permission-derive = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
-v-cli-sdk = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
-v-model = { git = "https://github.com/oxidecomputer/v-api", default-features = false, branch = "oauth-rework" }
+v-api = { git = "https://github.com/oxidecomputer/v-api", tag = "v0.4.11", features = ["sagas"] }
+v-api-param = { git = "https://github.com/oxidecomputer/v-api", tag = "v0.4.11" }
+v-api-permission-derive = { git = "https://github.com/oxidecomputer/v-api", tag = "v0.4.11", features = ["sagas"] }
+v-cli-sdk = { git = "https://github.com/oxidecomputer/v-api", tag = "v0.4.11" }
+v-model = { git = "https://github.com/oxidecomputer/v-api", tag = "v0.4.11", features = ["sagas"] }
+
+# [patch."https://github.com/oxidecomputer/v-api"]
+# v-api = { path = "../v-api/v-api" }
+# v-api-param = { path = "../v-api/v-api-param" }
+# v-api-permission-derive = { path = "../v-api/v-api-permission-derive" }
+# v-cli-sdk = { path = "../v-api/v-cli-sdk" }
+# v-model = { path = "../v-api/v-model" }

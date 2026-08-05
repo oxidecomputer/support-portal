@@ -64,6 +64,8 @@ fn cmd_path<'a>(cmd: &CliCommand) -> Option<&'a str> {
         CliCommand::UpdateApiUser => Some("sys user update"),
         CliCommand::GetSelf => Some("self"),
         CliCommand::SetApiUserContactEmail => Some("sys user contact email set"),
+        CliCommand::AddApiUserPermission => Some("sys user permission add"),
+        CliCommand::RemoveApiUserPermission => Some("sys user permission remove"),
 
         // Link commands are handled separately
         CliCommand::CreateLinkToken => None,

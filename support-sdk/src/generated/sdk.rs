@@ -283,7 +283,7 @@ pub mod types {
     ///      "type": "string",
     ///      "format": "date-time"
     ///    },
-    ///    "permissions": {
+    ///    "permission_boundary": {
     ///      "oneOf": [
     ///        {
     ///          "type": "null"
@@ -313,7 +313,7 @@ pub mod types {
     pub struct ApiKeyCreateParamsForApiPermissions {
         pub expires_at: ::chrono::DateTime<::chrono::offset::Utc>,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub permissions: ::std::option::Option<PermissionsForApiPermissions>,
+        pub permission_boundary: ::std::option::Option<PermissionsForApiPermissions>,
     }
 
     impl ApiKeyCreateParamsForApiPermissions {
@@ -365,7 +365,7 @@ pub mod types {
     ///    "id": {
     ///      "$ref": "#/components/schemas/TypedUuidForApiKeyId"
     ///    },
-    ///    "permissions": {
+    ///    "permission_boundary": {
     ///      "oneOf": [
     ///        {
     ///          "type": "null"
@@ -396,7 +396,7 @@ pub mod types {
         pub created_at: ::chrono::DateTime<::chrono::offset::Utc>,
         pub id: TypedUuidForApiKeyId,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub permissions: ::std::option::Option<PermissionsForApiPermissions>,
+        pub permission_boundary: ::std::option::Option<PermissionsForApiPermissions>,
     }
 
     impl ApiKeyResponseForApiPermissions {
@@ -1153,6 +1153,40 @@ pub mod types {
         }
     }
 
+    /// `ApiUserPermissionParamsForApiPermissions`
+    ///
+    /// <details><summary>JSON schema</summary>
+    ///
+    /// ```json
+    /// {
+    ///  "type": "object",
+    ///  "required": [
+    ///    "permission"
+    ///  ],
+    ///  "properties": {
+    ///    "permission": {
+    ///      "$ref": "#/components/schemas/ApiPermissions"
+    ///    }
+
+    ///  }
+
+    /// }
+
+    /// ```
+    /// </details>
+    #[derive(
+        :: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, schemars :: JsonSchema,
+    )]
+    pub struct ApiUserPermissionParamsForApiPermissions {
+        pub permission: ApiPermissions,
+    }
+
+    impl ApiUserPermissionParamsForApiPermissions {
+        pub fn builder() -> builder::ApiUserPermissionParamsForApiPermissions {
+            Default::default()
+        }
+    }
+
     /// `ApiUserProvider`
     ///
     /// <details><summary>JSON schema</summary>
@@ -1283,11 +1317,11 @@ pub mod types {
     /// {
     ///  "type": "object",
     ///  "required": [
-    ///    "group_ids",
     ///    "permissions"
     ///  ],
     ///  "properties": {
     ///    "group_ids": {
+    ///      "default": [],
     ///      "type": "array",
     ///      "items": {
     ///        "$ref": "#/components/schemas/TypedUuidForAccessGroupId"
@@ -1308,6 +1342,7 @@ pub mod types {
         :: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, schemars :: JsonSchema,
     )]
     pub struct ApiUserUpdateParamsForApiPermissions {
+        #[serde(default = "defaults::api_user_update_params_for_api_permissions_group_ids")]
         pub group_ids: Vec<TypedUuidForAccessGroupId>,
         pub permissions: PermissionsForApiPermissions,
     }
@@ -1438,12 +1473,6 @@ pub mod types {
     ///    },
     ///    "grant_type": {
     ///      "type": "string"
-    ///    },
-    ///    "pkce_verifier": {
-    ///      "type": [
-    ///        "string",
-    ///        "null"
-    ///      ]
     ///    }
 
     ///  }
@@ -1459,8 +1488,6 @@ pub mod types {
         pub client_id: TypedUuidForOAuthClientId,
         pub device_code: ::std::string::String,
         pub grant_type: ::std::string::String,
-        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub pkce_verifier: ::std::option::Option<::std::string::String>,
     }
 
     impl DeviceTokenExchangeRequest {
@@ -1580,7 +1607,7 @@ pub mod types {
     ///    "key": {
     ///      "$ref": "#/components/schemas/SecretString"
     ///    },
-    ///    "permissions": {
+    ///    "permission_boundary": {
     ///      "oneOf": [
     ///        {
     ///          "type": "null"
@@ -1612,7 +1639,7 @@ pub mod types {
         pub id: TypedUuidForApiKeyId,
         pub key: SecretString,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
-        pub permissions: ::std::option::Option<PermissionsForApiPermissions>,
+        pub permission_boundary: ::std::option::Option<PermissionsForApiPermissions>,
     }
 
     impl InitialApiKeyResponseForApiPermissions {
@@ -1915,7 +1942,7 @@ pub mod types {
     ///      "type": "string"
     ///    },
     ///    "secret": {
-    ///      "type": "string"
+    ///      "$ref": "#/components/schemas/SecretString"
     ///    }
 
     ///  }
@@ -1930,7 +1957,7 @@ pub mod types {
     pub struct MagicLinkExchangeRequest {
         pub attempt_id: TypedUuidForMagicLinkAttemptId,
         pub recipient: ::std::string::String,
-        pub secret: ::std::string::String,
+        pub secret: SecretString,
     }
 
     impl MagicLinkExchangeRequest {
@@ -2285,7 +2312,7 @@ pub mod types {
     ///      ]
     ///    },
     ///    "secret": {
-    ///      "type": "string"
+    ///      "$ref": "#/components/schemas/SecretString"
     ///    }
 
     ///  }
@@ -2304,7 +2331,7 @@ pub mod types {
         pub redirect_uri: ::std::string::String,
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub scope: ::std::option::Option<::std::string::String>,
-        pub secret: ::std::string::String,
+        pub secret: SecretString,
     }
 
     impl MagicLinkSendRequest {
@@ -2359,6 +2386,7 @@ pub mod types {
     ///    "id",
     ///    "name",
     ///    "rule",
+    ///    "source",
     ///    "updated_at"
     ///  ],
     ///  "properties": {
@@ -2401,6 +2429,9 @@ pub mod types {
     ///      "type": "string"
     ///    },
     ///    "rule": {},
+    ///    "source": {
+    ///      "$ref": "#/components/schemas/MapperSource"
+    ///    },
     ///    "updated_at": {
     ///      "type": "string",
     ///      "format": "date-time"
@@ -2428,6 +2459,7 @@ pub mod types {
         pub max_activations: ::std::option::Option<i32>,
         pub name: ::std::string::String,
         pub rule: ::serde_json::Value,
+        pub source: MapperSource,
         pub updated_at: ::chrono::DateTime<::chrono::offset::Utc>,
     }
 
@@ -2461,6 +2493,104 @@ pub mod types {
     #[serde(deny_unknown_fields)]
     pub enum MapperId {}
 
+    /// `MapperSource`
+    ///
+    /// <details><summary>JSON schema</summary>
+    ///
+    /// ```json
+    /// {
+    ///  "oneOf": [
+    ///    {
+    ///      "description": "Created via the API, persisted in the database,
+    /// supports activation limits",
+    ///      "type": "string",
+    ///      "enum": [
+    ///        "dynamic"
+    ///      ]
+    ///    },
+    ///    {
+    ///      "description": "Loaded from service configuration, in-memory only,
+    /// no activation limits",
+    ///      "type": "string",
+    ///      "enum": [
+    ///        "preset"
+    ///      ]
+    ///    }
+
+    ///  ]
+    /// }
+
+    /// ```
+    /// </details>
+    #[derive(
+        :: serde :: Deserialize,
+        :: serde :: Serialize,
+        Clone,
+        Copy,
+        Debug,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+        schemars :: JsonSchema,
+    )]
+    pub enum MapperSource {
+        /// Created via the API, persisted in the database, supports activation
+        /// limits
+        #[serde(rename = "dynamic")]
+        Dynamic,
+        /// Loaded from service configuration, in-memory only, no activation
+        /// limits
+        #[serde(rename = "preset")]
+        Preset,
+    }
+
+    impl ::std::fmt::Display for MapperSource {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            match *self {
+                Self::Dynamic => f.write_str("dynamic"),
+                Self::Preset => f.write_str("preset"),
+            }
+        }
+    }
+
+    impl ::std::str::FromStr for MapperSource {
+        type Err = self::error::ConversionError;
+        fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            match value {
+                "dynamic" => Ok(Self::Dynamic),
+                "preset" => Ok(Self::Preset),
+                _ => Err("invalid value".into()),
+            }
+        }
+    }
+
+    impl ::std::convert::TryFrom<&str> for MapperSource {
+        type Error = self::error::ConversionError;
+        fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+
+    impl ::std::convert::TryFrom<&::std::string::String> for MapperSource {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: &::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+
+    impl ::std::convert::TryFrom<::std::string::String> for MapperSource {
+        type Error = self::error::ConversionError;
+        fn try_from(
+            value: ::std::string::String,
+        ) -> ::std::result::Result<Self, self::error::ConversionError> {
+            value.parse()
+        }
+    }
+
     /// `OAuthAuthzCodeExchangeBody`
     ///
     /// <details><summary>JSON schema</summary>
@@ -2470,8 +2600,8 @@ pub mod types {
     ///  "type": "object",
     ///  "required": [
     ///    "code",
+    ///    "code_verifier",
     ///    "grant_type",
-    ///    "pkce_verifier",
     ///    "redirect_uri"
     ///  ],
     ///  "properties": {
@@ -2510,12 +2640,12 @@ pub mod types {
     ///    "code": {
     ///      "type": "string"
     ///    },
-    ///    "grant_type": {
-    ///      "type": "string"
-    ///    },
-    ///    "pkce_verifier": {
+    ///    "code_verifier": {
     ///      "description": "PKCE code verifier (RFC 7636). Required for all
     /// authorization code exchanges.",
+    ///      "type": "string"
+    ///    },
+    ///    "grant_type": {
     ///      "type": "string"
     ///    },
     ///    "redirect_uri": {
@@ -2537,10 +2667,10 @@ pub mod types {
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub client_secret: ::std::option::Option<SecretString>,
         pub code: ::std::string::String,
-        pub grant_type: ::std::string::String,
         /// PKCE code verifier (RFC 7636). Required for all authorization code
         /// exchanges.
-        pub pkce_verifier: ::std::string::String,
+        pub code_verifier: ::std::string::String,
+        pub grant_type: ::std::string::String,
         pub redirect_uri: ::std::string::String,
     }
 
@@ -2571,15 +2701,28 @@ pub mod types {
     ///      "type": "integer",
     ///      "format": "int64"
     ///    },
+    ///    "idp_refresh_token": {
+    ///      "description": "Refresh token issued by the upstream identity
+    /// provider. Returned under the same conditions as `idp_token`, and only
+    /// when the provider issued one.",
+    ///      "type": [
+    ///        "string",
+    ///        "null"
+    ///      ]
+    ///    },
     ///    "idp_token": {
+    ///      "description": "Access token issued by the upstream identity
+    /// provider. Only returned when the caller requested it and holds the
+    /// `RetrieveRemoteAccessToken` permission.",
     ///      "type": [
     ///        "string",
     ///        "null"
     ///      ]
     ///    },
     ///    "scope": {
-    ///      "description": "The scope granted to the access token (RFC 6749
-    /// §5.1).",
+    ///      "description": "The scope granted to the access token per RFC 6749
+    /// §5.1. An empty string indicates no permissions. Use \"full\" for all
+    /// permissions.",
     ///      "type": "string"
     ///    },
     ///    "token_type": {
@@ -2598,9 +2741,18 @@ pub mod types {
     pub struct OAuthAuthzCodeExchangeResponse {
         pub access_token: ::std::string::String,
         pub expires_in: i64,
+        /// Refresh token issued by the upstream identity provider. Returned
+        /// under the same conditions as `idp_token`, and only when the provider
+        /// issued one.
+        #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+        pub idp_refresh_token: ::std::option::Option<::std::string::String>,
+        /// Access token issued by the upstream identity provider. Only returned
+        /// when the caller requested it and holds the
+        /// `RetrieveRemoteAccessToken` permission.
         #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
         pub idp_token: ::std::option::Option<::std::string::String>,
-        /// The scope granted to the access token (RFC 6749 §5.1).
+        /// The scope granted to the access token per RFC 6749 §5.1. An empty
+        /// string indicates no permissions. Use "full" for all permissions.
         pub scope: ::std::string::String,
         pub token_type: ::std::string::String,
     }
@@ -4510,7 +4662,7 @@ pub mod types {
                 ::chrono::DateTime<::chrono::offset::Utc>,
                 ::std::string::String,
             >,
-            permissions: ::std::result::Result<
+            permission_boundary: ::std::result::Result<
                 ::std::option::Option<super::PermissionsForApiPermissions>,
                 ::std::string::String,
             >,
@@ -4520,7 +4672,7 @@ pub mod types {
             fn default() -> Self {
                 Self {
                     expires_at: Err("no value supplied for expires_at".to_string()),
-                    permissions: Ok(Default::default()),
+                    permission_boundary: Ok(Default::default()),
                 }
             }
         }
@@ -4536,16 +4688,16 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for expires_at: {e}"));
                 self
             }
-            pub fn permissions<T>(mut self, value: T) -> Self
+            pub fn permission_boundary<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<
                         ::std::option::Option<super::PermissionsForApiPermissions>,
                     >,
                 T::Error: ::std::fmt::Display,
             {
-                self.permissions = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for permissions: {e}"));
+                self.permission_boundary = value.try_into().map_err(|e| {
+                    format!("error converting supplied value for permission_boundary: {e}")
+                });
                 self
             }
         }
@@ -4559,7 +4711,7 @@ pub mod types {
             ) -> ::std::result::Result<Self, super::error::ConversionError> {
                 Ok(Self {
                     expires_at: value.expires_at?,
-                    permissions: value.permissions?,
+                    permission_boundary: value.permission_boundary?,
                 })
             }
         }
@@ -4570,7 +4722,7 @@ pub mod types {
             fn from(value: super::ApiKeyCreateParamsForApiPermissions) -> Self {
                 Self {
                     expires_at: Ok(value.expires_at),
-                    permissions: Ok(value.permissions),
+                    permission_boundary: Ok(value.permission_boundary),
                 }
             }
         }
@@ -4582,7 +4734,7 @@ pub mod types {
                 ::std::string::String,
             >,
             id: ::std::result::Result<super::TypedUuidForApiKeyId, ::std::string::String>,
-            permissions: ::std::result::Result<
+            permission_boundary: ::std::result::Result<
                 ::std::option::Option<super::PermissionsForApiPermissions>,
                 ::std::string::String,
             >,
@@ -4593,7 +4745,7 @@ pub mod types {
                 Self {
                     created_at: Err("no value supplied for created_at".to_string()),
                     id: Err("no value supplied for id".to_string()),
-                    permissions: Ok(Default::default()),
+                    permission_boundary: Ok(Default::default()),
                 }
             }
         }
@@ -4619,16 +4771,16 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for id: {e}"));
                 self
             }
-            pub fn permissions<T>(mut self, value: T) -> Self
+            pub fn permission_boundary<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<
                         ::std::option::Option<super::PermissionsForApiPermissions>,
                     >,
                 T::Error: ::std::fmt::Display,
             {
-                self.permissions = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for permissions: {e}"));
+                self.permission_boundary = value.try_into().map_err(|e| {
+                    format!("error converting supplied value for permission_boundary: {e}")
+                });
                 self
             }
         }
@@ -4643,7 +4795,7 @@ pub mod types {
                 Ok(Self {
                     created_at: value.created_at?,
                     id: value.id?,
-                    permissions: value.permissions?,
+                    permission_boundary: value.permission_boundary?,
                 })
             }
         }
@@ -4655,7 +4807,7 @@ pub mod types {
                 Self {
                     created_at: Ok(value.created_at),
                     id: Ok(value.id),
-                    permissions: Ok(value.permissions),
+                    permission_boundary: Ok(value.permission_boundary),
                 }
             }
         }
@@ -5050,6 +5202,55 @@ pub mod types {
         }
 
         #[derive(Clone, Debug)]
+        pub struct ApiUserPermissionParamsForApiPermissions {
+            permission: ::std::result::Result<super::ApiPermissions, ::std::string::String>,
+        }
+
+        impl ::std::default::Default for ApiUserPermissionParamsForApiPermissions {
+            fn default() -> Self {
+                Self {
+                    permission: Err("no value supplied for permission".to_string()),
+                }
+            }
+        }
+
+        impl ApiUserPermissionParamsForApiPermissions {
+            pub fn permission<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<super::ApiPermissions>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.permission = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for permission: {e}"));
+                self
+            }
+        }
+
+        impl ::std::convert::TryFrom<ApiUserPermissionParamsForApiPermissions>
+            for super::ApiUserPermissionParamsForApiPermissions
+        {
+            type Error = super::error::ConversionError;
+            fn try_from(
+                value: ApiUserPermissionParamsForApiPermissions,
+            ) -> ::std::result::Result<Self, super::error::ConversionError> {
+                Ok(Self {
+                    permission: value.permission?,
+                })
+            }
+        }
+
+        impl ::std::convert::From<super::ApiUserPermissionParamsForApiPermissions>
+            for ApiUserPermissionParamsForApiPermissions
+        {
+            fn from(value: super::ApiUserPermissionParamsForApiPermissions) -> Self {
+                Self {
+                    permission: Ok(value.permission),
+                }
+            }
+        }
+
+        #[derive(Clone, Debug)]
         pub struct ApiUserProvider {
             created_at: ::std::result::Result<
                 ::chrono::DateTime<::chrono::offset::Utc>,
@@ -5279,7 +5480,9 @@ pub mod types {
         impl ::std::default::Default for ApiUserUpdateParamsForApiPermissions {
             fn default() -> Self {
                 Self {
-                    group_ids: Err("no value supplied for group_ids".to_string()),
+                    group_ids: Ok(
+                        super::defaults::api_user_update_params_for_api_permissions_group_ids(),
+                    ),
                     permissions: Err("no value supplied for permissions".to_string()),
                 }
             }
@@ -5476,10 +5679,6 @@ pub mod types {
                 ::std::result::Result<super::TypedUuidForOAuthClientId, ::std::string::String>,
             device_code: ::std::result::Result<::std::string::String, ::std::string::String>,
             grant_type: ::std::result::Result<::std::string::String, ::std::string::String>,
-            pkce_verifier: ::std::result::Result<
-                ::std::option::Option<::std::string::String>,
-                ::std::string::String,
-            >,
         }
 
         impl ::std::default::Default for DeviceTokenExchangeRequest {
@@ -5488,7 +5687,6 @@ pub mod types {
                     client_id: Err("no value supplied for client_id".to_string()),
                     device_code: Err("no value supplied for device_code".to_string()),
                     grant_type: Err("no value supplied for grant_type".to_string()),
-                    pkce_verifier: Ok(Default::default()),
                 }
             }
         }
@@ -5524,16 +5722,6 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for grant_type: {e}"));
                 self
             }
-            pub fn pkce_verifier<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.pkce_verifier = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for pkce_verifier: {e}"));
-                self
-            }
         }
 
         impl ::std::convert::TryFrom<DeviceTokenExchangeRequest> for super::DeviceTokenExchangeRequest {
@@ -5545,7 +5733,6 @@ pub mod types {
                     client_id: value.client_id?,
                     device_code: value.device_code?,
                     grant_type: value.grant_type?,
-                    pkce_verifier: value.pkce_verifier?,
                 })
             }
         }
@@ -5556,7 +5743,6 @@ pub mod types {
                     client_id: Ok(value.client_id),
                     device_code: Ok(value.device_code),
                     grant_type: Ok(value.grant_type),
-                    pkce_verifier: Ok(value.pkce_verifier),
                 }
             }
         }
@@ -5711,7 +5897,7 @@ pub mod types {
             >,
             id: ::std::result::Result<super::TypedUuidForApiKeyId, ::std::string::String>,
             key: ::std::result::Result<super::SecretString, ::std::string::String>,
-            permissions: ::std::result::Result<
+            permission_boundary: ::std::result::Result<
                 ::std::option::Option<super::PermissionsForApiPermissions>,
                 ::std::string::String,
             >,
@@ -5723,7 +5909,7 @@ pub mod types {
                     created_at: Err("no value supplied for created_at".to_string()),
                     id: Err("no value supplied for id".to_string()),
                     key: Err("no value supplied for key".to_string()),
-                    permissions: Ok(Default::default()),
+                    permission_boundary: Ok(Default::default()),
                 }
             }
         }
@@ -5759,16 +5945,16 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for key: {e}"));
                 self
             }
-            pub fn permissions<T>(mut self, value: T) -> Self
+            pub fn permission_boundary<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<
                         ::std::option::Option<super::PermissionsForApiPermissions>,
                     >,
                 T::Error: ::std::fmt::Display,
             {
-                self.permissions = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for permissions: {e}"));
+                self.permission_boundary = value.try_into().map_err(|e| {
+                    format!("error converting supplied value for permission_boundary: {e}")
+                });
                 self
             }
         }
@@ -5784,7 +5970,7 @@ pub mod types {
                     created_at: value.created_at?,
                     id: value.id?,
                     key: value.key?,
-                    permissions: value.permissions?,
+                    permission_boundary: value.permission_boundary?,
                 })
             }
         }
@@ -5797,7 +5983,7 @@ pub mod types {
                     created_at: Ok(value.created_at),
                     id: Ok(value.id),
                     key: Ok(value.key),
-                    permissions: Ok(value.permissions),
+                    permission_boundary: Ok(value.permission_boundary),
                 }
             }
         }
@@ -6222,7 +6408,7 @@ pub mod types {
             attempt_id:
                 ::std::result::Result<super::TypedUuidForMagicLinkAttemptId, ::std::string::String>,
             recipient: ::std::result::Result<::std::string::String, ::std::string::String>,
-            secret: ::std::result::Result<::std::string::String, ::std::string::String>,
+            secret: ::std::result::Result<super::SecretString, ::std::string::String>,
         }
 
         impl ::std::default::Default for MagicLinkExchangeRequest {
@@ -6258,7 +6444,7 @@ pub mod types {
             }
             pub fn secret<T>(mut self, value: T) -> Self
             where
-                T: ::std::convert::TryInto<::std::string::String>,
+                T: ::std::convert::TryInto<super::SecretString>,
                 T::Error: ::std::fmt::Display,
             {
                 self.secret = value
@@ -6601,7 +6787,7 @@ pub mod types {
                 ::std::option::Option<::std::string::String>,
                 ::std::string::String,
             >,
-            secret: ::std::result::Result<::std::string::String, ::std::string::String>,
+            secret: ::std::result::Result<super::SecretString, ::std::string::String>,
         }
 
         impl ::std::default::Default for MagicLinkSendRequest {
@@ -6670,7 +6856,7 @@ pub mod types {
             }
             pub fn secret<T>(mut self, value: T) -> Self
             where
-                T: ::std::convert::TryInto<::std::string::String>,
+                T: ::std::convert::TryInto<super::SecretString>,
                 T::Error: ::std::fmt::Display,
             {
                 self.secret = value
@@ -6775,6 +6961,7 @@ pub mod types {
                 ::std::result::Result<::std::option::Option<i32>, ::std::string::String>,
             name: ::std::result::Result<::std::string::String, ::std::string::String>,
             rule: ::std::result::Result<::serde_json::Value, ::std::string::String>,
+            source: ::std::result::Result<super::MapperSource, ::std::string::String>,
             updated_at: ::std::result::Result<
                 ::chrono::DateTime<::chrono::offset::Utc>,
                 ::std::string::String,
@@ -6792,6 +6979,7 @@ pub mod types {
                     max_activations: Ok(Default::default()),
                     name: Err("no value supplied for name".to_string()),
                     rule: Err("no value supplied for rule".to_string()),
+                    source: Err("no value supplied for source".to_string()),
                     updated_at: Err("no value supplied for updated_at".to_string()),
                 }
             }
@@ -6882,6 +7070,16 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for rule: {e}"));
                 self
             }
+            pub fn source<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<super::MapperSource>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.source = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for source: {e}"));
+                self
+            }
             pub fn updated_at<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<::chrono::DateTime<::chrono::offset::Utc>>,
@@ -6908,6 +7106,7 @@ pub mod types {
                     max_activations: value.max_activations?,
                     name: value.name?,
                     rule: value.rule?,
+                    source: value.source?,
                     updated_at: value.updated_at?,
                 })
             }
@@ -6924,6 +7123,7 @@ pub mod types {
                     max_activations: Ok(value.max_activations),
                     name: Ok(value.name),
                     rule: Ok(value.rule),
+                    source: Ok(value.source),
                     updated_at: Ok(value.updated_at),
                 }
             }
@@ -6940,8 +7140,8 @@ pub mod types {
                 ::std::string::String,
             >,
             code: ::std::result::Result<::std::string::String, ::std::string::String>,
+            code_verifier: ::std::result::Result<::std::string::String, ::std::string::String>,
             grant_type: ::std::result::Result<::std::string::String, ::std::string::String>,
-            pkce_verifier: ::std::result::Result<::std::string::String, ::std::string::String>,
             redirect_uri: ::std::result::Result<::std::string::String, ::std::string::String>,
         }
 
@@ -6951,8 +7151,8 @@ pub mod types {
                     client_id: Ok(Default::default()),
                     client_secret: Ok(Default::default()),
                     code: Err("no value supplied for code".to_string()),
+                    code_verifier: Err("no value supplied for code_verifier".to_string()),
                     grant_type: Err("no value supplied for grant_type".to_string()),
-                    pkce_verifier: Err("no value supplied for pkce_verifier".to_string()),
                     redirect_uri: Err("no value supplied for redirect_uri".to_string()),
                 }
             }
@@ -6989,6 +7189,16 @@ pub mod types {
                     .map_err(|e| format!("error converting supplied value for code: {e}"));
                 self
             }
+            pub fn code_verifier<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::string::String>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.code_verifier = value
+                    .try_into()
+                    .map_err(|e| format!("error converting supplied value for code_verifier: {e}"));
+                self
+            }
             pub fn grant_type<T>(mut self, value: T) -> Self
             where
                 T: ::std::convert::TryInto<::std::string::String>,
@@ -6997,16 +7207,6 @@ pub mod types {
                 self.grant_type = value
                     .try_into()
                     .map_err(|e| format!("error converting supplied value for grant_type: {e}"));
-                self
-            }
-            pub fn pkce_verifier<T>(mut self, value: T) -> Self
-            where
-                T: ::std::convert::TryInto<::std::string::String>,
-                T::Error: ::std::fmt::Display,
-            {
-                self.pkce_verifier = value
-                    .try_into()
-                    .map_err(|e| format!("error converting supplied value for pkce_verifier: {e}"));
                 self
             }
             pub fn redirect_uri<T>(mut self, value: T) -> Self
@@ -7030,8 +7230,8 @@ pub mod types {
                     client_id: value.client_id?,
                     client_secret: value.client_secret?,
                     code: value.code?,
+                    code_verifier: value.code_verifier?,
                     grant_type: value.grant_type?,
-                    pkce_verifier: value.pkce_verifier?,
                     redirect_uri: value.redirect_uri?,
                 })
             }
@@ -7043,8 +7243,8 @@ pub mod types {
                     client_id: Ok(value.client_id),
                     client_secret: Ok(value.client_secret),
                     code: Ok(value.code),
+                    code_verifier: Ok(value.code_verifier),
                     grant_type: Ok(value.grant_type),
-                    pkce_verifier: Ok(value.pkce_verifier),
                     redirect_uri: Ok(value.redirect_uri),
                 }
             }
@@ -7054,6 +7254,10 @@ pub mod types {
         pub struct OAuthAuthzCodeExchangeResponse {
             access_token: ::std::result::Result<::std::string::String, ::std::string::String>,
             expires_in: ::std::result::Result<i64, ::std::string::String>,
+            idp_refresh_token: ::std::result::Result<
+                ::std::option::Option<::std::string::String>,
+                ::std::string::String,
+            >,
             idp_token: ::std::result::Result<
                 ::std::option::Option<::std::string::String>,
                 ::std::string::String,
@@ -7067,6 +7271,7 @@ pub mod types {
                 Self {
                     access_token: Err("no value supplied for access_token".to_string()),
                     expires_in: Err("no value supplied for expires_in".to_string()),
+                    idp_refresh_token: Ok(Default::default()),
                     idp_token: Ok(Default::default()),
                     scope: Err("no value supplied for scope".to_string()),
                     token_type: Err("no value supplied for token_type".to_string()),
@@ -7093,6 +7298,16 @@ pub mod types {
                 self.expires_in = value
                     .try_into()
                     .map_err(|e| format!("error converting supplied value for expires_in: {e}"));
+                self
+            }
+            pub fn idp_refresh_token<T>(mut self, value: T) -> Self
+            where
+                T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+                T::Error: ::std::fmt::Display,
+            {
+                self.idp_refresh_token = value.try_into().map_err(|e| {
+                    format!("error converting supplied value for idp_refresh_token: {e}")
+                });
                 self
             }
             pub fn idp_token<T>(mut self, value: T) -> Self
@@ -7137,6 +7352,7 @@ pub mod types {
                 Ok(Self {
                     access_token: value.access_token?,
                     expires_in: value.expires_in?,
+                    idp_refresh_token: value.idp_refresh_token?,
                     idp_token: value.idp_token?,
                     scope: value.scope?,
                     token_type: value.token_type?,
@@ -7151,6 +7367,7 @@ pub mod types {
                 Self {
                     access_token: Ok(value.access_token),
                     expires_in: Ok(value.expires_in),
+                    idp_refresh_token: Ok(value.idp_refresh_token),
                     idp_token: Ok(value.idp_token),
                     scope: Ok(value.scope),
                     token_type: Ok(value.token_type),
@@ -7801,6 +8018,14 @@ pub mod types {
             }
         }
     }
+
+    /// Generation of default values for serde.
+    pub mod defaults {
+        pub(super) fn api_user_update_params_for_api_permissions_group_ids()
+        -> Vec<super::TypedUuidForAccessGroupId> {
+            vec![]
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -7931,7 +8156,10 @@ impl Client {
         builder::GetApiUser::new(self)
     }
 
-    /// Update the permissions assigned to a given user
+    /// Update the permissions assigned to a given user. These replace any
+    /// existing
+    ///
+    /// permissions.
     ///
     /// Sends a `POST` request to `/api-user/{user_id}`
     ///
@@ -8004,6 +8232,36 @@ impl Client {
     /// ```
     pub fn link_provider(&self) -> builder::LinkProvider<'_> {
         builder::LinkProvider::new(self)
+    }
+
+    /// Add a single permission to a user
+    ///
+    /// Sends a `POST` request to `/api-user/{user_id}/permission`
+    ///
+    /// ```ignore
+    /// let response = client.add_api_user_permission()
+    ///    .user_id(user_id)
+    ///    .body(body)
+    ///    .send()
+    ///    .await;
+    /// ```
+    pub fn add_api_user_permission(&self) -> builder::AddApiUserPermission<'_> {
+        builder::AddApiUserPermission::new(self)
+    }
+
+    /// Remove a single permission from a user
+    ///
+    /// Sends a `DELETE` request to `/api-user/{user_id}/permission`
+    ///
+    /// ```ignore
+    /// let response = client.remove_api_user_permission()
+    ///    .user_id(user_id)
+    ///    .body(body)
+    ///    .send()
+    ///    .await;
+    /// ```
+    pub fn remove_api_user_permission(&self) -> builder::RemoveApiUserPermission<'_> {
+        builder::RemoveApiUserPermission::new(self)
     }
 
     /// List api keys for a user
@@ -9423,6 +9681,232 @@ pub mod builder {
             let response = result?;
             match response.status().as_u16() {
                 204u16 => Ok(ResponseValue::empty(response)),
+                400u16..=499u16 => Err(Error::ErrorResponse(
+                    ResponseValue::from_response(response).await?,
+                )),
+                500u16..=599u16 => Err(Error::ErrorResponse(
+                    ResponseValue::from_response(response).await?,
+                )),
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+
+    /// Builder for [`Client::add_api_user_permission`]
+    ///
+    /// [`Client::add_api_user_permission`]: super::Client::add_api_user_permission
+    #[derive(Debug, Clone)]
+    pub struct AddApiUserPermission<'a> {
+        client: &'a super::Client,
+        user_id: Result<types::TypedUuidForUserId, String>,
+        body: Result<types::builder::ApiUserPermissionParamsForApiPermissions, String>,
+    }
+
+    impl<'a> AddApiUserPermission<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                user_id: Err("user_id was not initialized".to_string()),
+                body: Ok(::std::default::Default::default()),
+            }
+        }
+
+        pub fn user_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::TypedUuidForUserId>,
+        {
+            self.user_id = value
+                .try_into()
+                .map_err(|_| "conversion to `TypedUuidForUserId` for user_id failed".to_string());
+            self
+        }
+
+        pub fn body<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::ApiUserPermissionParamsForApiPermissions>,
+            <V as std::convert::TryInto<types::ApiUserPermissionParamsForApiPermissions>>::Error:
+                std::fmt::Display,
+        {
+            self.body = value.try_into().map(From::from).map_err(|s| {
+                format!(
+                    "conversion to `ApiUserPermissionParamsForApiPermissions` for body failed: {}",
+                    s
+                )
+            });
+            self
+        }
+
+        pub fn body_map<F>(mut self, f: F) -> Self
+        where
+            F: std::ops::FnOnce(
+                    types::builder::ApiUserPermissionParamsForApiPermissions,
+                )
+                    -> types::builder::ApiUserPermissionParamsForApiPermissions,
+        {
+            self.body = self.body.map(f);
+            self
+        }
+
+        /// Sends a `POST` request to `/api-user/{user_id}/permission`
+        pub async fn send(
+            self,
+        ) -> Result<ResponseValue<types::GetUserResponseForApiPermissions>, Error<types::Error>>
+        {
+            let Self {
+                client,
+                user_id,
+                body,
+            } = self;
+            let user_id = user_id.map_err(Error::InvalidRequest)?;
+            let body = body
+                .and_then(|v| {
+                    types::ApiUserPermissionParamsForApiPermissions::try_from(v)
+                        .map_err(|e| e.to_string())
+                })
+                .map_err(Error::InvalidRequest)?;
+            let url = format!(
+                "{}/api-user/{}/permission",
+                client.baseurl,
+                encode_path(&user_id.to_string()),
+            );
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(1usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .post(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .json(&body)
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "add_api_user_permission",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
+                400u16..=499u16 => Err(Error::ErrorResponse(
+                    ResponseValue::from_response(response).await?,
+                )),
+                500u16..=599u16 => Err(Error::ErrorResponse(
+                    ResponseValue::from_response(response).await?,
+                )),
+                _ => Err(Error::UnexpectedResponse(response)),
+            }
+        }
+    }
+
+    /// Builder for [`Client::remove_api_user_permission`]
+    ///
+    /// [`Client::remove_api_user_permission`]: super::Client::remove_api_user_permission
+    #[derive(Debug, Clone)]
+    pub struct RemoveApiUserPermission<'a> {
+        client: &'a super::Client,
+        user_id: Result<types::TypedUuidForUserId, String>,
+        body: Result<types::builder::ApiUserPermissionParamsForApiPermissions, String>,
+    }
+
+    impl<'a> RemoveApiUserPermission<'a> {
+        pub fn new(client: &'a super::Client) -> Self {
+            Self {
+                client: client,
+                user_id: Err("user_id was not initialized".to_string()),
+                body: Ok(::std::default::Default::default()),
+            }
+        }
+
+        pub fn user_id<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::TypedUuidForUserId>,
+        {
+            self.user_id = value
+                .try_into()
+                .map_err(|_| "conversion to `TypedUuidForUserId` for user_id failed".to_string());
+            self
+        }
+
+        pub fn body<V>(mut self, value: V) -> Self
+        where
+            V: std::convert::TryInto<types::ApiUserPermissionParamsForApiPermissions>,
+            <V as std::convert::TryInto<types::ApiUserPermissionParamsForApiPermissions>>::Error:
+                std::fmt::Display,
+        {
+            self.body = value.try_into().map(From::from).map_err(|s| {
+                format!(
+                    "conversion to `ApiUserPermissionParamsForApiPermissions` for body failed: {}",
+                    s
+                )
+            });
+            self
+        }
+
+        pub fn body_map<F>(mut self, f: F) -> Self
+        where
+            F: std::ops::FnOnce(
+                    types::builder::ApiUserPermissionParamsForApiPermissions,
+                )
+                    -> types::builder::ApiUserPermissionParamsForApiPermissions,
+        {
+            self.body = self.body.map(f);
+            self
+        }
+
+        /// Sends a `DELETE` request to `/api-user/{user_id}/permission`
+        pub async fn send(
+            self,
+        ) -> Result<ResponseValue<types::GetUserResponseForApiPermissions>, Error<types::Error>>
+        {
+            let Self {
+                client,
+                user_id,
+                body,
+            } = self;
+            let user_id = user_id.map_err(Error::InvalidRequest)?;
+            let body = body
+                .and_then(|v| {
+                    types::ApiUserPermissionParamsForApiPermissions::try_from(v)
+                        .map_err(|e| e.to_string())
+                })
+                .map_err(Error::InvalidRequest)?;
+            let url = format!(
+                "{}/api-user/{}/permission",
+                client.baseurl,
+                encode_path(&user_id.to_string()),
+            );
+            let mut header_map = ::reqwest::header::HeaderMap::with_capacity(1usize);
+            header_map.append(
+                ::reqwest::header::HeaderName::from_static("api-version"),
+                ::reqwest::header::HeaderValue::from_static(super::Client::api_version()),
+            );
+            #[allow(unused_mut)]
+            let mut request = client
+                .client
+                .delete(url)
+                .header(
+                    ::reqwest::header::ACCEPT,
+                    ::reqwest::header::HeaderValue::from_static("application/json"),
+                )
+                .json(&body)
+                .headers(header_map)
+                .build()?;
+            let info = OperationInfo {
+                operation_id: "remove_api_user_permission",
+            };
+            client.pre(&mut request, &info).await?;
+            let result = client.exec(request, &info).await;
+            client.post(&result, &info).await?;
+            let response = result?;
+            match response.status().as_u16() {
+                200u16 => ResponseValue::from_response(response).await,
                 400u16..=499u16 => Err(Error::ErrorResponse(
                     ResponseValue::from_response(response).await?,
                 )),

@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
-v-api-installer = { workspace = true }
+v-model = { workspace = true }

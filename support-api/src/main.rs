@@ -70,7 +70,7 @@ async fn main() -> anyhow::Result<()> {
             support_model::migration::run_migrations(
                 config
                     .database_url
-                    .resolve(config.param_base_path)?
+                    .resolve(config.param_base_path.as_deref())?
                     .expose_secret(),
             )
             .await?;
