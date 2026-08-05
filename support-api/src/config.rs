@@ -2,12 +2,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-use std::path::PathBuf;
-
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
+use std::path::PathBuf;
 use tap::TapFallible;
-use v_api::config::{AsymmetricKey, AuthnProviders, ServerLogFormat};
+use v_api::{
+    PresetMapperConfig,
+    config::{AsymmetricKey, AuthnProviders, ServerLogFormat},
+};
 use v_api_param::StringParam;
 
 #[derive(Debug, Deserialize)]
@@ -21,6 +23,7 @@ pub struct ServerConfig {
     pub database_url: StringParam,
     pub jwt: JwtConfig,
     pub authn: AuthnProviders,
+    pub presets: Option<PresetsConfig>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -45,4 +48,9 @@ impl ServerConfig {
             .try_deserialize()
             .tap_err(|err| println!("Failed to deserialize settings file: {}", err))
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PresetsConfig {
+    pub mappers: Vec<PresetMapperConfig>,
 }

@@ -40,6 +40,7 @@ serde_json = "1.0"
 similar = "2.7.0"
 slog = "2.8.2"
 slog-async = "2.8.0"
+strum = { version = "0.28.0", features = ["derive"] }
 tabwriter = "1.4.1"
 tap = "1.0.1"
 thiserror = "2"
