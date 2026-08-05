@@ -104,6 +104,7 @@ impl CliOAuthAdapter for OAuthAdapter {
                 return Ok(OAuthProvider {
                     provider,
                     info: OAuthProviderInfo::Pkce(resp.into_inner()),
+                    scope: vec!["full".to_string()],
                 });
             }
 
@@ -116,6 +117,7 @@ impl CliOAuthAdapter for OAuthAdapter {
                 return Ok(OAuthProvider {
                     provider,
                     info: OAuthProviderInfo::Device(resp.into_inner()),
+                    scope: vec!["full".to_string()],
                 });
             }
 
@@ -215,6 +217,7 @@ impl CliMagicLinkAdapter for MagicLinkAdapter {
 pub struct OAuthProvider {
     provider: VLoginProvider,
     info: OAuthProviderInfo,
+    scope: Vec<String>,
 }
 
 pub enum OAuthProviderInfo {
@@ -262,7 +265,7 @@ impl CliOAuthProviderInfo for OAuthProvider {
         }
     }
     fn scopes(&self) -> &[String] {
-        &[]
+        &self.scope
     }
     fn device_authorization_endpoint(&self) -> Option<&str> {
         match &self.info {
