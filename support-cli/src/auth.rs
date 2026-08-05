@@ -48,7 +48,8 @@ impl From<LoginProvider> for VLoginProvider {
 
 pub struct AdapterToken {
     token: String,
-    idp_token: Option<String>,
+    idp_access_token: Option<String>,
+    idp_refresh_token: Option<String>,
 }
 
 impl CliAdapterToken for AdapterToken {
@@ -56,8 +57,12 @@ impl CliAdapterToken for AdapterToken {
         &self.token
     }
 
-    fn idp_token(&self) -> Option<&str> {
-        self.idp_token.as_deref()
+    fn idp_access_token(&self) -> Option<&str> {
+        self.idp_access_token.as_deref()
+    }
+
+    fn idp_refresh_token(&self) -> Option<&str> {
+        self.idp_refresh_token.as_deref()
     }
 }
 
@@ -138,7 +143,7 @@ impl CliOAuthAdapter for OAuthAdapter {
                         .code(exchange.code)
                         .redirect_uri(exchange.redirect_uri)
                         .grant_type(exchange.grant_type)
-                        .pkce_verifier(exchange.pkce_verifier.secret().to_string())
+                        .code_verifier(exchange.pkce_verifier.secret().to_string())
                 })
                 .send()
                 .await
@@ -146,7 +151,8 @@ impl CliOAuthAdapter for OAuthAdapter {
                 .into_inner();
             Ok(AdapterToken {
                 token: response.access_token,
-                idp_token: response.idp_token,
+                idp_access_token: response.idp_token,
+                idp_refresh_token: response.idp_refresh_token,
             })
         })
     }
@@ -176,7 +182,8 @@ impl CliOAuthAdapter for OAuthAdapter {
                 .into_inner();
             Ok(AdapterToken {
                 token: key.key.0,
-                idp_token: None,
+                idp_access_token: None,
+                idp_refresh_token: None,
             })
         })
     }

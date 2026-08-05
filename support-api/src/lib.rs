@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 use dropshot::BuildError as DropshotError;
+use newtype_uuid::TypedUuid;
 use secrecy::ExposeSecret;
 use slog::Logger;
 use std::{
@@ -56,7 +57,8 @@ pub async fn run_server(
     param_path: Option<PathBuf>,
     logger: Logger,
 ) -> Result<(), ServerError> {
-    let database_url_secret = config.database_url.resolve(param_path.clone())?;
+    let node_id = TypedUuid::new_v4();
+    let database_url_secret = config.database_url.resolve(param_path.as_deref())?;
 
     let mut v_ctx = VContextBuilder::new()
         .with_public_url(config.public_url.clone())
@@ -68,21 +70,13 @@ pub async fn run_server(
             ApiPermissions::ManageOAuthClientsAll,
             ApiPermissions::RetrieveRemoteAccessToken,
         ])
+        .with_saga_backend(node_id, Some(logger.clone()))
         .build()
         .await?;
 
     // Install OAuth provider
     if let Some(zendesk) = config.authn.oauth.zendesk {
-        let resolved = zendesk.resolve(param_path)?;
-        // let device_secret = zendesk
-        //     .proxy_web
-        //     .device
-        //     .client_secret
-        //     .resolve(config.param_base_path.clone())?;
-        // let web_secret = zendesk
-        //     .web
-        //     .client_secret
-        //     .resolve(config.param_base_path.clone())?;
+        let resolved = zendesk.resolve(param_path.as_deref())?;
         let public_url = config.public_url.clone();
         v_ctx.insert_oauth_provider(
             OAuthProviderName::Zendesk,
@@ -92,10 +86,6 @@ pub async fn run_server(
                     resolved,
                     public_url.clone(),
                     "oxidecomputerhelp".to_string(),
-                    // zendesk.device.client_id.clone(),
-                    // device_secret.clone(),
-                    // zendesk.web.client_id.clone(),
-                    // web_secret.clone(),
                     None,
                 ))
             }),
