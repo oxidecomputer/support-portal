@@ -287,9 +287,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.4.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5add81bb678e6cb321aff7fa0dc7689ad82b112dbc032cea19f91d6b8e3582b9"
+checksum = "9066c49992464636f92905fa096ec58baaa4d57ec19a5c096c68d3e25ef3d136"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -772,9 +772,9 @@ dependencies = [
 
 [[package]]
 name = "diesel"
-version = "2.3.11"
+version = "2.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e54d1f576cd3a3460f212a4615fd12ce1b6303c095b79a44449ffbe627753dc1"
+checksum = "715377c6e464cb44bb89bd8487584240516c8d5052bc645d6babc50bb8be46c3"
 dependencies = [
  "bitflags",
  "byteorder",
@@ -956,8 +956,8 @@ dependencies = [
 
 [[package]]
 name = "dropshot-authorization-header"
-version = "0.4.12"
-source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.12#538e9fae141249e7bd8960e21b3f376a1eae9c1e"
+version = "0.4.13"
+source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.13#8a000bf84cf1f9db4ea2fcdfadafb9cac6855849"
 dependencies = [
  "async-trait",
  "base64",
@@ -1065,9 +1065,9 @@ checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.9"
+version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
+checksum = "26b73573e6edcd2af0cdf47bd6cb58f0b3839491263c314eaad1ccf24430e1de"
 
 [[package]]
 name = "fixedbitset"
@@ -4255,8 +4255,8 @@ dependencies = [
 
 [[package]]
 name = "v-api"
-version = "0.4.12"
-source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.12#538e9fae141249e7bd8960e21b3f376a1eae9c1e"
+version = "0.4.13"
+source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.13#8a000bf84cf1f9db4ea2fcdfadafb9cac6855849"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4302,8 +4302,8 @@ dependencies = [
 
 [[package]]
 name = "v-api-param"
-version = "0.4.12"
-source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.12#538e9fae141249e7bd8960e21b3f376a1eae9c1e"
+version = "0.4.13"
+source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.13#8a000bf84cf1f9db4ea2fcdfadafb9cac6855849"
 dependencies = [
  "secrecy",
  "serde",
@@ -4312,8 +4312,8 @@ dependencies = [
 
 [[package]]
 name = "v-api-permission-derive"
-version = "0.4.12"
-source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.12#538e9fae141249e7bd8960e21b3f376a1eae9c1e"
+version = "0.4.13"
+source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.13#8a000bf84cf1f9db4ea2fcdfadafb9cac6855849"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -4323,8 +4323,8 @@ dependencies = [
 
 [[package]]
 name = "v-cli-sdk"
-version = "0.4.12"
-source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.12#538e9fae141249e7bd8960e21b3f376a1eae9c1e"
+version = "0.4.13"
+source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.13#8a000bf84cf1f9db4ea2fcdfadafb9cac6855849"
 dependencies = [
  "anyhow",
  "clap",
@@ -4346,8 +4346,8 @@ dependencies = [
 
 [[package]]
 name = "v-model"
-version = "0.4.12"
-source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.12#538e9fae141249e7bd8960e21b3f376a1eae9c1e"
+version = "0.4.13"
+source = "git+https://github.com/oxidecomputer/v-api?tag=v0.4.13#8a000bf84cf1f9db4ea2fcdfadafb9cac6855849"
 dependencies = [
  "async-bb8-diesel",
  "async-trait",
